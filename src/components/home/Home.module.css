@@ -1,0 +1,32 @@
+.table {
+    /* border: 1px solid red; */
+    width: 100vw;
+}
+
+.tr {
+    width: 100%;
+}
+
+.thead {
+    /* border: 1px solid blue; */
+}
+
+.thead > li > h2 {
+    display: inline-block;
+}
+
+.td {
+    border: 1px solid gray;
+    padding: 2px 8px;
+}
+
+.td.del {
+    width: 4%;
+    border: none;
+}
+.td.init {width: 5%;}
+.td.name {width: 23%;}
+.td.ac {width: 6%;}
+.td.hp {width: 6%;}
+.td.cond {width: 20%;}
+.td.notes {width: 36%;}

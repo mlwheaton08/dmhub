@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+	color-scheme: light dark;
+	--clr-light: rgb(244, 244, 244);
+	--clr-dark: rgb(27, 27, 27);
+	
+	--clr-foreground: var(--clr-dark);
+	--clr-background: var(--clr-light);
+	/* need to set these variables according to a light theme, and move the dark colors into the media query */
+	--clr-background-2: rgb(218, 218, 218);
+	--clr-background-3: rgb(199, 199, 199);
+	--clr-background-4: rgb(180, 180, 180);
+	--clr-background-clear: rgba(12, 12, 12, 0.95);
+	--clr-primary: rgb(224, 154, 49);
+	--clr-secondary: rgb(222, 76, 51);
+	--clr-accent: rgb(187, 75, 209);
+
+	--nav-height: 60px;
+	--dashNav-width: 210px;
+	--screen-minus-nav-height: calc(100vh - var(--nav-height));
+
+	color: var(--clr-foreground);
+	background-color: var(--clr-background);
+}
+
+input {
+	all: unset;
+	box-sizing: border-box;
+	background-color: var(--clr-background);
+}
+
+button {
+	padding: 2px 8px;
+	border-radius: 6px;
+	background-color: var(--clr-primary);
+	color: var(--clr-background);
+	transition: all 200ms ease;
+}
+
+button:hover:enabled {
+	background-color: var(--clr-secondary);
+	color: var(--clr-background-2);
+}
+
+button:disabled {
+	opacity: 0.5;
+}
+
+svg {
+	fill: var(--clr-background-3);
+	aspect-ratio: 1/1;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--clr-foreground: var(--clr-light);
+		--clr-background: var(--clr-dark);
+		--clr-background-2: rgb(20, 20, 20);
+		--clr-background-3: rgb(43, 43, 43);
+		--clr-background-4: rgb(54, 54, 54);
+	}
+	input {
+		border: none;
+		background-color: rgba(255, 255, 255, 0.1);
+	}
+	svg {
+		fill: var(--clr-background);
+	}
+}
+
+@media screen and (max-width: 600px) {
+	:root {
+		--nav-height: 50px;
+	}
+}

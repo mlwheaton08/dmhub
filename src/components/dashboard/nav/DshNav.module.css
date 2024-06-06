@@ -1,0 +1,15 @@
+.main {
+    /* border: 1px solid red; */
+    position: fixed;
+    /* margin-top: var(--nav-height); */
+    width: var(--dashNav-width);
+    height: calc(100vh - var(--nav-height));
+    padding-top: 10px;
+    padding-left: 20px;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
