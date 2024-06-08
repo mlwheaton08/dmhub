@@ -5,14 +5,15 @@
 
 .tr {
     width: 100%;
+    display: flex;
 }
 
-.thead {
-    /* border: 1px solid blue; */
+.tr > * {
+    height: 40px;
 }
 
-.thead > li > h2 {
-    display: inline-block;
+.thead > h2 {
+    height: auto;
 }
 
 .td {
@@ -20,13 +21,25 @@
     padding: 2px 8px;
 }
 
-.td.del {
-    width: 4%;
+.td.move {
+    width: 3%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     border: none;
 }
+.td.del:disabled {
+    opacity: 0;
+}
 .td.init {width: 5%;}
-.td.name {width: 23%;}
+.td.name {width: 20%;}
 .td.ac {width: 6%;}
 .td.hp {width: 6%;}
 .td.cond {width: 20%;}
 .td.notes {width: 36%;}
+.td.del {
+    width: 4%;
+    display: flex;
+    align-items: center;
+    border: none;
+}
