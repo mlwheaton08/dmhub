@@ -1,25 +1,36 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import styles from "./Home.module.css"
 
 export function Home() {
 
-    const [slots, setSlots] = useState(
-        [
-            {
-                initiative: 0,
-                name: "",
-                ac: 0,
-                hp: 0,
-                condition: "",
-                notes: ""
-            }
-        ]
-    )
+    // noel says let user color each row how they want
+    // maybe number rows?
+
+    const emptySlot = {
+        "initiative": {value: 0},
+        "name": {value: ""},
+        "ac": {value: 0},
+        "hp": {value: 0},
+        "condition": {value: ""},
+        "notes": {value: ""}
+    }
+    const defaultColumns = {
+        "initiative": {displayOrder: 1, displayName: "Init.", hidden: false, width: "5%"},
+        "name": {displayOrder: 2, displayName: "Name", hidden: false, width: "20%"},
+        "ac": {displayOrder: 3, displayName: "AC", hidden: false, width: "6%"},
+        "hp": {displayOrder: 4, displayName: "HP", hidden: false, width: "6%"},
+        "condition": {displayOrder: 5, displayName: "Condition", hidden: false, width: "20%"},
+        "notes": {displayOrder: 6, displayName: "Notes", hidden: false, width: "36%"}
+    }
+
+    const [showColumnFilter, setShowColumnFilter] = useState(false)
+    const [columns, setColumns] = useState(defaultColumns)
+    const [slots, setSlots] = useState([emptySlot])
 
     const handleSort = () => {
         function compare( a, b ) {
-            if ( a.initiative < b.initiative ) return 1
-            if ( a.initiative > b.initiative ) return -1
+            if ( a["initiative"].value < b["initiative"].value ) return 1
+            if ( a["initiative"].value > b["initiative"].value ) return -1
             return 0;
         }
 
@@ -29,17 +40,42 @@ export function Home() {
     }
 
     const handleAddRow = () => {
+        if (slots.length >= 100) return
+
         const copy = [...slots]
-        copy.push({
-            initiative: 0,
-            name: "",
-            ac: 0,
-            hp: 0,
-            condition: "",
-            notes: ""
-        })
+        copy.push(emptySlot)
         setSlots(copy)
     }
+
+    const reset = () => {
+        // setColumns(defaultColumns)
+        setSlots([emptySlot])
+    }
+
+    const setStorage = () => {
+        localStorage.setItem("dnd_combat_tracker", JSON.stringify({
+            columns: columns,
+            slots: slots
+        }))
+    }
+
+    const getStorage = async () => {
+        const dnd_combat_tracker = await JSON.parse(localStorage.getItem("dnd_combat_tracker"))
+        if (dnd_combat_tracker) {
+            setColumns(dnd_combat_tracker.columns)
+            setSlots(dnd_combat_tracker.slots)
+        }
+    }
+
+    useEffect(() => {
+        getStorage()
+    },[])
+
+    useEffect(() => {
+        setStorage()
+        // i think the function below causes infinite loop
+        // getStorage()
+    },[columns, slots])
 
 
     return <>
@@ -48,30 +84,78 @@ export function Home() {
                 Combat tracker
             </h1>
 
-            <div className="m-4">
+            <div className="m-4 mb-20 flex gap-4">
                 <button
-                    className="mx-2"
                     onClick={handleSort}
                 >
                     sort
                 </button>
                 <button
-                    className="mx-2"
                     onClick={handleAddRow}
                 >
                     add row
                 </button>
+                <button
+                    onClick={reset}
+                >
+                    reset
+                </button>
+                <div
+                    className="relative z-10"
+                    onMouseEnter={() => setShowColumnFilter(true)}
+                    onMouseLeave={() => setShowColumnFilter(false)}
+                >
+                    <div className="absolute flex flex-col w-fit p-2 rounded bg-gray-100">
+                        <span className="text-gray-500 italic text-nowrap">Filter columns</span>
+                        {
+                            !showColumnFilter
+                                ? <svg
+                                    className="h-3 fill-gray-500"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 512 512"
+                                >
+                                    <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/>
+                                </svg>
+                                : Object.keys(columns).map((key, index) => {
+                                    return (
+                                        <div key={`column_checkbox-${index}`} className="flex gap-1 text-black">
+                                            <input
+                                                type="checkbox"
+                                                id={key}
+                                                value={key}
+                                                checked={!columns[key].hidden}
+                                                onChange={(e) => {
+                                                    const copy = {...columns}
+                                                    copy[key].hidden = !e.target.checked
+                                                    setColumns(copy)
+                                                }}
+                                            />
+                                            <label htmlFor="initiative"> {columns[key].displayName}</label>
+                                        </div>
+                                    )
+                                })
+                            }
+                    </div>
+                </div>
             </div>
 
             <div className={styles.table}>
                 <div className={`${styles.tr} ${styles.thead}`}>
                     <h2 className={`${styles.td} ${styles.move}`}></h2>
-                    <h2 className={`${styles.td} ${styles.init}`}>Init.</h2>
-                    <h2 className={`${styles.td} ${styles.name}`}>Name</h2>
-                    <h2 className={`${styles.td} ${styles.ac}`}>AC</h2>
-                    <h2 className={`${styles.td} ${styles.hp}`}>HP</h2>
-                    <h2 className={`${styles.td} ${styles.cond}`}>Condition</h2>
-                    <h2 className={`${styles.td} ${styles.notes}`}>Notes</h2>
+                    {
+                        Object.keys(columns).map((key, index) => {
+                            if (columns[key].hidden) return
+                            return (
+                                <h2
+                                    key={`column_header-${index}`}
+                                    className={styles.td}
+                                    style={{width: columns[key].width}}
+                                >
+                                    {columns[key].displayName}
+                                </h2>
+                            )
+                        })
+                    }
                     <h2 className={`${styles.td} ${styles.del}`}></h2>
                 </div>
                 {
@@ -121,66 +205,90 @@ export function Home() {
                                 </div>
 
                                 {/* Inputs */}
-                                <input
-                                    className={`${styles.td} ${styles.init}`}
-                                    type="number"
-                                    value={slot.initiative}
-                                    onChange={(evt) => {
-                                        const copy = [...slots]
-                                        copy[index].initiative = parseInt(evt.target.value)
-                                        setSlots(copy)
-                                    }}
-                                />
-                                <input
-                                    className={`${styles.td} ${styles.name}`}
-                                    type="text"
-                                    value={slot.name}
-                                    onChange={(evt) => {
-                                        const copy = [...slots]
-                                        copy[index].name = evt.target.value
-                                        setSlots(copy)
-                                    }}
-                                />
-                                <input
-                                    className={`${styles.td} ${styles.ac}`}
-                                    type="number"
-                                    value={slot.ac}
-                                    onChange={(evt) => {
-                                        const copy = [...slots]
-                                        copy[index].ac = parseInt(evt.target.value)
-                                        setSlots(copy)
-                                    }}
-                                />
-                                <input
-                                    className={`${styles.td} ${styles.hp}`}
-                                    type="number"
-                                    value={slot.hp}
-                                    onChange={(evt) => {
-                                        const copy = [...slots]
-                                        copy[index].hp = parseInt(evt.target.value)
-                                        setSlots(copy)
-                                    }}
-                                />
-                                <input
-                                    className={`${styles.td} ${styles.cond}`}
-                                    type="text"
-                                    value={slot.condition}
-                                    onChange={(evt) => {
-                                        const copy = [...slots]
-                                        copy[index].condition = evt.target.value
-                                        setSlots(copy)
-                                    }}
-                                />
-                                <input
-                                    className={`${styles.td} ${styles.notes}`}
-                                    type="text"
-                                    value={slot.notes}
-                                    onChange={(evt) => {
-                                        const copy = [...slots]
-                                        copy[index].notes = evt.target.value
-                                        setSlots(copy)
-                                    }}
-                                />
+                                {
+                                    columns["initiative"].hidden
+                                        ? ""
+                                        : <input
+                                            className={`${styles.td} ${styles.init}`}
+                                            type="number"
+                                            value={slot["initiative"].value}
+                                            onChange={(evt) => {
+                                                const copy = [...slots]
+                                                copy[index]["initiative"].value = parseInt(evt.target.value)
+                                                setSlots(copy)
+                                            }}
+                                        />
+                                }
+                                {
+                                    columns["name"].hidden
+                                        ? ""
+                                        : <input
+                                            className={`${styles.td} ${styles.name}`}
+                                            type="text"
+                                            value={slot["name"].value}
+                                            onChange={(evt) => {
+                                                const copy = [...slots]
+                                                copy[index]["name"].value = evt.target.value
+                                                setSlots(copy)
+                                            }}
+                                        />
+                                }
+                                {
+                                    columns["ac"].hidden
+                                        ? ""
+                                        : <input
+                                            className={`${styles.td} ${styles.ac}`}
+                                            type="number"
+                                            value={slot["ac"].value}
+                                            onChange={(evt) => {
+                                                const copy = [...slots]
+                                                copy[index]["ac"].value = parseInt(evt.target.value)
+                                                setSlots(copy)
+                                            }}
+                                        />
+                                }
+                                {
+                                    columns["hp"].hidden
+                                        ? ""
+                                        : <input
+                                            className={`${styles.td} ${styles.hp}`}
+                                            type="number"
+                                            value={slot["hp"].value}
+                                            onChange={(evt) => {
+                                                const copy = [...slots]
+                                                copy[index]["hp"].value = parseInt(evt.target.value)
+                                                setSlots(copy)
+                                            }}
+                                        />
+                                }
+                                {
+                                    columns["condition"].hidden
+                                        ? ""
+                                        : <input
+                                            className={`${styles.td} ${styles.cond}`}
+                                            type="text"
+                                            value={slot["condition"].value}
+                                            onChange={(evt) => {
+                                                const copy = [...slots]
+                                                copy[index]["condition"].value = evt.target.value
+                                                setSlots(copy)
+                                            }}
+                                        />
+                                }
+                                {
+                                    columns["notes"].hidden
+                                        ? ""
+                                        : <input
+                                            className={`${styles.td} ${styles.notes}`}
+                                            type="text"
+                                            value={slot["notes"].value}
+                                            onChange={(evt) => {
+                                                const copy = [...slots]
+                                                copy[index]["notes"].value = evt.target.value
+                                                setSlots(copy)
+                                            }}
+                                        />
+                                }
 
                                 {/* Delete button */}
                                 <div className={`${styles.td} ${styles.del}`}>
