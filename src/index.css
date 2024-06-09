@@ -8,8 +8,8 @@
 	--clr-light: rgb(244, 244, 244);
 	--clr-dark: rgb(27, 27, 27);
 	
-	--clr-foreground: var(--clr-dark);
-	--clr-background: var(--clr-light);
+	--clr-foreground: var(--clr-light);
+	--clr-background: var(--clr-dark);
 	/* need to set these variables according to a light theme, and move the dark colors into the media query */
 	--clr-background-2: rgb(218, 218, 218);
 	--clr-background-3: rgb(199, 199, 199);
@@ -18,6 +18,13 @@
 	--clr-primary: rgb(224, 154, 49);
 	--clr-secondary: rgb(222, 76, 51);
 	--clr-accent: rgb(187, 75, 209);
+	--clr-input-background: rgba(255, 255, 255, 0.1);
+
+	--clr-licorice: #210f04;
+	--clr-seal-brown: #452103;
+	--clr-blood-red: #690500;
+	--clr-brown: #934b00;
+	--clr-tiger-eye: #bb6b00;
 
 	--nav-height: 60px;
 	--dashNav-width: 210px;
@@ -31,7 +38,7 @@ input {
 	/* all: unset; */
 	outline: none;
 	box-sizing: border-box;
-	background-color: var(--clr-background);
+	background-color: var(--clr-input-background);
 }
 
 button {
@@ -42,10 +49,10 @@ button {
 	transition: all 200ms ease;
 }
 
-button:hover:enabled {
+/* button:hover:enabled {
 	background-color: var(--clr-secondary);
 	color: var(--clr-background-2);
-}
+} */
 
 button:disabled {
 	opacity: 0.5;
@@ -56,25 +63,12 @@ svg {
 	aspect-ratio: 1/1;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
 	:root {
 		--clr-foreground: var(--clr-light);
 		--clr-background: var(--clr-dark);
-		--clr-background-2: rgb(20, 20, 20);
-		--clr-background-3: rgb(43, 43, 43);
-		--clr-background-4: rgb(54, 54, 54);
 	}
 	input {
-		border: none;
 		background-color: rgba(255, 255, 255, 0.1);
 	}
-	svg {
-		fill: var(--clr-background);
-	}
-}
-
-@media screen and (max-width: 600px) {
-	:root {
-		--nav-height: 50px;
-	}
-}
+} */

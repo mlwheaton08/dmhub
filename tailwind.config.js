@@ -15,7 +15,13 @@ export default {
 				"clr-background-clear": "var(--clr-background-clear)",
 				"clr-primary": "var(--clr-primary)",
 				"clr-secondary": "var(--clr-secondary)",
-				"clr-accent": "var(--clr-accent)"
+				"clr-accent": "var(--clr-accent)",
+				"clr-licorice": "var(--clr-licorice)",
+				"clr-seal-brown": "var(--clr-seal-brown)",
+				"clr-blood-red": "var(--clr-blood-red)",
+				"clr-brown": "var(--clr-brown)",
+				"clr-tiger-eye": "var(--clr-tiger-eye)",
+				"clr-input-background": "var(--clr-input-background)"
 			},
 			height: {
 				"nav-height": "var(--nav-height)",

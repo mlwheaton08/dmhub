@@ -28,18 +28,37 @@
     align-items: center;
     border: none;
 }
-.td.del:disabled {
-    opacity: 0;
+.td.init {
+    width: 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--clr-input-background);
 }
-.td.init {width: 5%;}
-.td.name {width: 20%;}
+.td.name {width: 18%;}
 .td.ac {width: 6%;}
 .td.hp {width: 6%;}
-.td.cond {width: 20%;}
-.td.notes {width: 36%;}
-.td.del {
+.td.cond {width: 18%;}
+.td.notes {width: 34%;}
+.td.dead {
     width: 4%;
+    padding: 0;
     display: flex;
     align-items: center;
     border: none;
 }
+.td.del {
+    width: 4%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    border: none;
+}
+.td.del:disabled {
+    opacity: 0;
+}
+
+/* .isDead {
+    color: rgba(128, 128, 128, 0.603);
+    text-decoration: line-through;
+} */
