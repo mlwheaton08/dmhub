@@ -38,7 +38,14 @@
 .td.name {width: 18%;}
 .td.ac {width: 6%;}
 .td.hp {width: 6%;}
-.td.cond {width: 18%;}
+.td.cond {
+    width: 18%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px;
+    overflow: hidden;
+}
 .td.notes {width: 34%;}
 .td.dead {
     width: 4%;

@@ -1,27 +1,18 @@
 import { useEffect, useState } from "react"
 import styles from "./Home.module.css"
+import { conditions_dict } from '../../utils/dictionaries'
+import { emptySlot, defaultColumns } from '../../utils/constants'
 
 export function Home() {
 
     // noel says let user color each row how they want
     // maybe number rows?
-
-    const emptySlot = {
-        "initiative": {value: ""},
-        "name": {value: ""},
-        "ac": {value: ""},
-        "hp": {value: "", isDead: false},
-        "condition": {value: ""},
-        "notes": {value: ""}
-    }
-    const defaultColumns = {
-        "initiative": {displayOrder: 1, displayName: "Initiative", hidden: false, width: "7%"},
-        "name": {displayOrder: 2, displayName: "Name", hidden: false, width: "18%"},
-        "ac": {displayOrder: 3, displayName: "AC", hidden: false, width: "6%"},
-        "hp": {displayOrder: 4, displayName: "HP", hidden: false, width: "6%"},
-        "condition": {displayOrder: 5, displayName: "Condition", hidden: false, width: "18%"},
-        "notes": {displayOrder: 6, displayName: "Notes", hidden: false, width: "34%"}
-    }
+    // also count rounds of combat
+    // maybe radio button to track whose turn it is?
+        // might have to do custom radio button since there's one per slot, and i'm mapping the slots to get them to appear
+            // what i mean is idk if the default radio button logic would work if they're all not part of the same form. idk
+        // also, the radio buttons prolly wouldn't even have to do anything. literally just a marker for whose turn it is
+            // unless i implemented a "next turn" and a round counter logic. then i'd need the radio buttons connected to state i think
 
     const [showColumnFilter, setShowColumnFilter] = useState(false)
     const [columns, setColumns] = useState(defaultColumns)
@@ -41,7 +32,7 @@ export function Home() {
         setSlots(copy)
     }
 
-    const handleAddRow = () => {
+    const handleAddSlot = () => {
         if (slots.length >= 100) return
 
         const copy = [...slots]
@@ -115,19 +106,20 @@ export function Home() {
         }
     }
 
-    useEffect(() => {
-        getStorage()
-    },[])
+    // useEffect(() => {
+    //     getStorage()
+    // },[])
 
-    useEffect(() => {
-        setStorage()
-        // i think the function below causes infinite loop
-        // getStorage()
-    },[columns, slots])
+    // useEffect(() => {
+    //     setStorage()
+    //     // i think the function below causes infinite loop
+    //     // getStorage()
+    // },[columns, slots])
 
 
     return <>
        <div className={styles.main}>
+            {/* Save icon */}
             <div className="fixed top-6 right-6">
                 <span className={`absolute top-0 text-sm ${showSavedPopup ? "right-8 opacity-100" : "right-0 opacity-0"} transition-all duration-300`}>
                     Saved!
@@ -154,7 +146,7 @@ export function Home() {
             <div className="mx-4 py-6 flex gap-4">
                 <button
                     className="bg-transparent text-emerald-300 border border-emerald-300 hover:bg-emerald-300 hover:text-black"
-                    onClick={handleAddRow}
+                    onClick={handleAddSlot}
                 >
                     add row
                 </button>
@@ -176,6 +168,8 @@ export function Home() {
                 >
                     reset
                 </button>
+
+                {/* Column filter */}
                 <div
                     className="relative z-10 ml-auto hover:cursor-pointer"
                     onMouseEnter={() => setShowColumnFilter(true)}
@@ -217,6 +211,7 @@ export function Home() {
                 </div>
             </div>
 
+            {/* Headers */}
             <div className={styles.table}>
                 <div className={`${styles.tr} ${styles.thead}`}>
                     <h2 className={`${styles.td} ${styles.move}`}></h2>
@@ -237,9 +232,24 @@ export function Home() {
                     <h2 className={`${styles.td} ${styles.dead}`}></h2>
                     <h2 className={`${styles.td} ${styles.del}`}></h2>
                 </div>
+
+                {/* Slots */}
                 {
                     slots.map((slot, index) => {
                         return (
+                            // <div key={index}>
+                            //     <input
+                            //         className="border border-white"
+                            //         value={slot["name"].value}
+                            //         onChange={(e) => {
+                            //             const copy = [...slots]
+                            //             // need the line below bc it was updating every item in slot array otherwise
+                            //                 // "directly modifying nested properties of objects in React state isn't recommended because it can lead to unexpected behavior. React won't detect the change in state properly, which can cause issues with rendering and re-renders."
+                            //             copy[index] = { ...copy[index], name: { ...copy[index].name, value: e.target.value } }
+                            //             setSlots(copy)
+                            //         }}
+                            //     />
+                            // </div>
                             <div
                                 key={`slot-${index}`}
                                 className={`${styles.tr} ${styles.tbody}`}
@@ -305,10 +315,10 @@ export function Home() {
                                                 type="number"
                                                 disabled={slot["hp"].isDead}
                                                 value={slot["initiative"].value}
-                                                onChange={(evt) => {
+                                                onChange={(e) => {
                                                     const copy = [...slots]
-                                                    const currentValue = parseInt(evt.target.value)
-                                                    copy[index]["initiative"].value = isNaN(currentValue) ? "" : currentValue
+                                                    const currentValue = parseInt(e.target.value)
+                                                    copy[index] = { ...copy[index], "initiative": { ...copy[index]["initiative"], value: isNaN(currentValue) ? "" : currentValue } }
                                                     setSlots(copy)
                                                 }}
                                                 onKeyDown={(e) => {
@@ -349,9 +359,11 @@ export function Home() {
                                             type="text"
                                             disabled={slot["hp"].isDead}
                                             value={slot["name"].value}
-                                            onChange={(evt) => {
+                                            onChange={(e) => {
                                                 const copy = [...slots]
-                                                copy[index]["name"].value = evt.target.value
+                                                // need the line below bc it was updating every item in slot array otherwise
+                                                    // "directly modifying nested properties of objects in React state isn't recommended because it can lead to unexpected behavior. React won't detect the change in state properly, which can cause issues with rendering and re-renders."
+                                                copy[index] = { ...copy[index], "name": { ...copy[index]["name"], value: e.target.value } }
                                                 setSlots(copy)
                                             }}
                                             onKeyDown={(e) => {
@@ -373,10 +385,10 @@ export function Home() {
                                             type="number"
                                             disabled={slot["hp"].isDead}
                                             value={slot["ac"].value}
-                                            onChange={(evt) => {
+                                            onChange={(e) => {
                                                 const copy = [...slots]
-                                                const currentValue = parseInt(evt.target.value)
-                                                copy[index]["ac"].value = isNaN(currentValue) ? "" : currentValue
+                                                const currentValue = parseInt(e.target.value)
+                                                copy[index] = { ...copy[index], "ac": { ...copy[index]["ac"], value: isNaN(currentValue) ? "" : currentValue } }
                                                 setSlots(copy)
                                             }}
                                             onKeyDown={(e) => {
@@ -398,10 +410,10 @@ export function Home() {
                                             type="number"
                                             disabled={slot["hp"].isDead}
                                             value={slot["hp"].value}
-                                            onChange={(evt) => {
+                                            onChange={(e) => {
                                                 const copy = [...slots]
-                                                const currentValue = parseInt(evt.target.value)
-                                                copy[index]["hp"].value = isNaN(currentValue) ? "" : currentValue
+                                                const currentValue = parseInt(e.target.value)
+                                                copy[index] = { ...copy[index], "hp": { ...copy[index]["hp"], value: isNaN(currentValue) ? "" : currentValue } }
                                                 setSlots(copy)
                                             }}
                                             onKeyDown={(e) => {
@@ -415,27 +427,94 @@ export function Home() {
                                         />
                                 }
                                 {
-                                    columns["condition"].hidden
+                                    columns["conditions"].hidden
                                         ? ""
-                                        : <input
-                                            id={`slot_input-condition-${index}`}
-                                            className={`${styles.td} ${styles.cond} ${slot["hp"].isDead ? "text-gray-400 italic" : ""}`}
-                                            type="text"
-                                            value={slot["condition"].value}
-                                            onChange={(evt) => {
-                                                const copy = [...slots]
-                                                copy[index]["condition"].value = evt.target.value
-                                                setSlots(copy)
-                                            }}
-                                            onKeyDown={(e) => {
-                                                if (index < slots.length - 1) {
-                                                    handleInputKeyDown(e, "condition", index + 1)
+                                        : <div className={`z-0 ${styles.td} ${styles.cond}`}>
+                                            {/* Icons */}
+                                            <div className="flex gap-0.5 overflow-hidden">
+                                                {
+                                                    Object.keys(conditions_dict).map((condKey, condIndex) => {
+                                                        if (slot["conditions"][condKey].value === true) {
+                                                            return (
+                                                                <span
+                                                                    key={`cond-${index}-${condIndex}`}
+                                                                    className="relative"
+                                                                    // onMouseEnter={() => {
+                                                                    //     const copy = [...slots]
+                                                                    //     copy[index]["conditions"][condKey].showIconPopup = true
+                                                                    //     setSlots(copy)
+                                                                    // }}
+                                                                    // onMouseLeave={() => {
+                                                                    //     const copy = [...slots]
+                                                                    //     copy[index]["conditions"][condKey].showIconPopup = false
+                                                                    //     setSlots(copy)
+                                                                    // }}
+                                                                >
+                                                                    <span
+                                                                        className={`absolute left-1/2 -translate-x-1/2 px-1 py-0.5 rounded bg-slate-800 text-sm ${slots[index]["conditions"][condKey].showIconPopup ? "-top-4" : "top-0 hidden"}`}
+                                                                    >
+                                                                        {condKey}
+                                                                    </span>
+                                                                    {conditions_dict[condKey].svg}
+                                                                </span>
+                                                            )
+                                                        }
+                                                    })
                                                 }
-                                                if (index === slots.length - 1) {
-                                                    handleInputKeyDown(e, "condition", 0)
+                                            </div>
+                                            {/* ----- Dropdown ----- */}
+                                            {/* Parent */}
+                                            <div className="relative z-10">
+                                                {/* The div below is only there so the svg can rotate while this div stays still (aka it is just the background) */}
+                                                {/* Dropdown Icon */}
+                                                <div
+                                                    className={`relative w-4 h-4 ${slot["conditions"].showDropdown ? "bg-clr-foreground" : "bg-clr-transparent"} hover:cursor-pointer hover:bg-clr-foreground rounded transition-all duration-200`}
+                                                    onClick={() => {
+                                                        const copy = [...slots]
+                                                        copy[index] = { ...copy[index], "conditions": { ...copy[index]["conditions"], showDropdown: !copy[index]["conditions"].showDropdown } }
+                                                        setSlots(copy)
+                                                    }}
+                                                >
+                                                    <svg
+                                                        className={`w-full h-full ${slot["conditions"].showDropdown ? "fill-clr-background rotate-180" : "fill-clr-foreground"} hover:fill-clr-background transition-all duration-200`}
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 320 512"
+                                                    >
+                                                        <path d="M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z"/>
+                                                    </svg>
+                                                </div>
+                                                {/* Dropdown Menu */}
+                                                {
+                                                    slot["conditions"].showDropdown
+                                                        ? <div className="fixed bg-slate-400 rounded">
+                                                            {
+                                                                Object.keys(conditions_dict).map((condKey_checkbox, i) => {
+                                                                    return (
+                                                                        <div key={`cond_checkbox-${i}`} className="flex gap-1 text-black hover:cursor-pointer">
+                                                                            <input
+                                                                                className="hover:cursor-pointer"
+                                                                                type="checkbox"
+                                                                                id={condKey_checkbox}
+                                                                                value={slot["conditions"][condKey_checkbox].value}
+                                                                                checked={slot["conditions"][condKey_checkbox].value}
+                                                                                onChange={(e) => {
+                                                                                    const copy = [...slots];
+                                                                                    const updatedConditions = { ...copy[index].conditions };
+                                                                                    updatedConditions[condKey_checkbox] = { ...updatedConditions[condKey_checkbox], value: e.target.checked };
+                                                                                    copy[index] = { ...copy[index], conditions: updatedConditions };
+                                                                                    setSlots(copy);
+                                                                                  }}
+                                                                            />
+                                                                            <label htmlFor={condKey_checkbox} className="hover:cursor-pointer"> {condKey_checkbox}</label>
+                                                                        </div>
+                                                                    )
+                                                                })
+                                                            }
+                                                        </div>
+                                                        : ""
                                                 }
-                                            }}
-                                        />
+                                            </div>
+                                        </div>
                                 }
                                 {
                                     columns["notes"].hidden
@@ -445,9 +524,9 @@ export function Home() {
                                             className={`${styles.td} ${styles.notes} ${slot["hp"].isDead ? "text-gray-400 italic" : ""}`}
                                             type="text"
                                             value={slot["notes"].value}
-                                            onChange={(evt) => {
+                                            onChange={(e) => {
                                                 const copy = [...slots]
-                                                copy[index]["notes"].value = evt.target.value
+                                                copy[index] = { ...copy[index], "notes": { ...copy[index]["notes"], value: e.target.value } }
                                                 setSlots(copy)
                                             }}
                                             onKeyDown={(e) => {
