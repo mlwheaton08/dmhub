@@ -91,7 +91,7 @@ export const conditions_dict = {
     },
     "Prone": {
         svg: <svg
-            className="w-5 h-5 fill-slate-300 transition-all duration-200"
+            className="w-5 h-5 fill-slate-300 transition-all duration-200 -rotate-90"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 448 512"
         >
@@ -109,7 +109,7 @@ export const conditions_dict = {
     },
     "Stunned": {
         svg: <svg
-            className="w-5 h-5 fill-slate-300 transition-all duration-200"
+            className="w-5 h-5 fill-slate-300 transition-all duration-200 rotate-12"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 512 512"
         >
