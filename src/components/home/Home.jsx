@@ -49,7 +49,7 @@ export function Home() {
         const copy = [...slots]
         for (const slot of copy) {
             if (!slot["hp"].isDead) {
-                slot["initiative"].value = Math.floor(Math.random() * 21)
+                slot["initiative"].value = Math.floor((Math.random() * 20) + 1)
             }
         }
         setSlots(copy)
@@ -339,7 +339,7 @@ export function Home() {
                                                         onClick={() => {
                                                             if (!slot["hp"].isDead) {
                                                                 const copy = [...slots]
-                                                                copy[index]["initiative"].value = Math.floor(Math.random() * 21)
+                                                                copy[index]["initiative"].value = Math.floor((Math.random() * 20) + 1)
                                                                 setSlots(copy)
                                                             }
                                                         }}
