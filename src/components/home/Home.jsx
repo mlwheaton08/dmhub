@@ -46,10 +46,28 @@ export function Home() {
     }
 
     const rollAll = () => {
+        // const copy = [...slots]
+        // for (const slot of copy) {
+        //     if (!slot["hp"].isDead) {
+        //         slot["initiative"].value = Math.floor((Math.random() * 20) + 1)
+        //     }
+        // }
+        // setSlots(copy)
+
+        // const copy = [...slots]
+        // for (const slot of copy) {
+        //     if (!slot["hp"].isDead) {
+        //         const rollValue = Math.floor((Math.random() * 20) + 1)
+        //         slot = { ...slot, "initiative": { ...slot["initiative"], value: rollValue } }
+        //     }
+        // }
+        // setSlots(copy)
+
         const copy = [...slots]
-        for (const slot of copy) {
-            if (!slot["hp"].isDead) {
-                slot["initiative"].value = Math.floor((Math.random() * 20) + 1)
+        for (let i = 0; i < copy.length; i++) {
+            if (!copy[i]["hp"].isDead) {
+                const rollValue = Math.floor((Math.random() * 20) + 1)
+                copy[i] = { ...copy[i], "initiative": { ...copy[i]["initiative"], value: rollValue } }
             }
         }
         setSlots(copy)
@@ -333,13 +351,15 @@ export function Home() {
                                             {
                                                 mouseHoverRowIndex === index && !slot["hp"].isDead
                                                     ? <svg
-                                                        className={`w-1/4 fill-clr-background ${!slot["hp"].isDead ? "hover:cursor-pointer hover:fill-clr-foreground" : ""}`}
+                                                        className={`w-1/4 max-w-5 fill-clr-background ${!slot["hp"].isDead ? "hover:cursor-pointer hover:fill-clr-foreground" : ""}`}
                                                         xmlns="http://www.w3.org/2000/svg"
                                                         viewBox="0 0 512 512"
+                                                        disabled={slot["hp"].isDead}
                                                         onClick={() => {
                                                             if (!slot["hp"].isDead) {
                                                                 const copy = [...slots]
-                                                                copy[index]["initiative"].value = Math.floor((Math.random() * 20) + 1)
+                                                                const rollValue = Math.floor((Math.random() * 20) + 1)
+                                                                copy[index] = { ...copy[index], "initiative": { ...copy[index]["initiative"], value: rollValue } }
                                                                 setSlots(copy)
                                                             }
                                                         }}
