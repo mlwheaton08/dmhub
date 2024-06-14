@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import styles from "./CombatTracker2.module.css"
 import { useState } from "react"
+import { StatBlock } from "../stat_block/StatBlock"
 
 export function CombatTracker2() {
 
@@ -32,6 +33,8 @@ export function CombatTracker2() {
             <button onClick={() => fetchMonster(monster)}>
                 search
             </button>
+
+            <StatBlock />
         </div>
     )
 }

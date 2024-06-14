@@ -41,13 +41,13 @@ input {
 	background-color: var(--clr-input-background);
 }
 
-button {
+/* button {
 	padding: 2px 8px;
 	border-radius: 6px;
 	background-color: var(--clr-primary);
 	color: var(--clr-background);
 	transition: all 200ms ease;
-}
+} */
 
 /* button:hover:enabled {
 	background-color: var(--clr-secondary);
