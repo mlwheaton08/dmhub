@@ -35,7 +35,7 @@ export const defaultColumns = {
 export const exampleMonsterObj = {
     index: "skeleton",
     name: "Skeleton",
-    size: "Medium",
+    size: "bob",
     type: "undead",
     alignment: "lawful evil",
     // below is an array. do i need to iterate through it? are there monsters with multiple of these?

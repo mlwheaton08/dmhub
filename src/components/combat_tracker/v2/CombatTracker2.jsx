@@ -34,7 +34,7 @@ export function CombatTracker2() {
                 search
             </button>
 
-            {/* <StatBlock monster={monster} /> */}
+            <StatBlock monster={monster} />
         </div>
     )
 }
