@@ -1,6 +1,18 @@
 import styles from "./StatBlock.module.css"
+import { exampleMonsterObj } from "../../../utils/constants"
 
-export function StatBlock() {
+export function StatBlock({ monster }) {
+
+    // carefully format the jsx so it's as readable as possible. it's getting cluttered fast lol
+    // need to compile a list of properties that need to be parsed out. right now it's only the "1d8+4" shit
+    // still need sections for other things (like spells)
+    // think of good place to cleanly keep logic that determines whether or not to add a section to the stat block
+    // lil note: each spell has a url to this api so i can easily have definitions ready :) i'm sure there are other properties like this too
+
+    const displayAbilityScore = (abilityScore) => {
+        const modifier = `${abilityScore > 10 ? "+" : ""}${Math.floor((abilityScore - 10) / 2)}`
+        return `${abilityScore} (${modifier})` // ex: "14 (+2)"
+    }
 
 
     return <div className={styles.main}>
@@ -10,8 +22,8 @@ export function StatBlock() {
         <div className={styles.card}>
             {/* header */}
             <div className={`${styles.cardSection} ${styles.header}`}>
-                <h1>Abyssal Basilisk</h1>
-                <h2><i>Large fiend (demon), chaotic evil</i></h2>
+                <h1>{monster.name}</h1>
+                <h2><i>{monster.size} {monster.type}, {monster.alignment}</i></h2>
             </div>
             <div className={styles.divider}>
                 <img src="https://media-waterdeep.cursecdn.com/file-attachments/0/579/stat-block-header-bar.svg"></img>
@@ -19,9 +31,9 @@ export function StatBlock() {
 
             {/* ac, hp, speed (base stats) */}
             <div className={`${styles.cardSection} ${styles.baseStats}`}>
-                <div><b>Armor Class</b> 17 (natural armor)</div>
-                <div><b>Hit Points</b> 126 <button className={styles.button}>(12d10 + 60)</button></div>
-                <div><b>Speed</b> 20 ft.</div>
+                <div><b>Armor Class</b> {monster.armor_class[0].value} ({monster.armor_class[0].desc})</div>
+                <div><b>Hit Points</b> {monster.hit_points} <button className={styles.button}>({monster.hit_points_roll.die_count}d{monster.hit_points_roll.die} + {monster.hit_points_roll.bonus})</button></div>
+                <div><b>Speed</b> {monster.speed.walk}</div>
             </div>
             <div className={styles.divider}>
                 <img src="https://media-waterdeep.cursecdn.com/file-attachments/0/579/stat-block-header-bar.svg"></img>
@@ -32,37 +44,37 @@ export function StatBlock() {
                 <div>
                     <div><b>STR</b></div>
                     <div>
-                        <button className={styles.button}>19 (+4)</button>
+                        <button className={styles.button}>{displayAbilityScore(monster.strength)}</button>
                     </div>
                 </div>
                 <div>
                     <div><b>DEX</b></div>
                     <div>
-                        <button className={styles.button}>13 (+1)</button>
+                        <button className={styles.button}>{displayAbilityScore(monster.dexterity)}</button>
                     </div>
                 </div>
                 <div>
                     <div><b>CON</b></div>
                     <div>
-                        <button className={styles.button}>20 (+5)</button>
+                        <button className={styles.button}>{displayAbilityScore(monster.constitution)}</button>
                     </div>
                 </div>
                 <div>
                     <div><b>INT</b></div>
                     <div>
-                        <button className={styles.button}>4 (-3)</button>
+                        <button className={styles.button}>{displayAbilityScore(monster.intelligence)}</button>
                     </div>
                 </div>
                 <div>
                     <div><b>WIS</b></div>
                     <div>
-                        <button className={styles.button}>14 (+2)</button>
+                        <button className={styles.button}>{displayAbilityScore(monster.wisdom)}</button>
                     </div>
                 </div>
                 <div>
                     <div><b>CHA</b></div>
                     <div>
-                        <button className={styles.button}>8 (-1)</button>
+                        <button className={styles.button}>{displayAbilityScore(monster.charisma)}</button>
                     </div>
                 </div>
             </div>
@@ -72,9 +84,8 @@ export function StatBlock() {
 
             {/* skills, proficiencies, etc. */}
             <div className={`${styles.cardSection} ${styles.skillsProficiencies}`}>
-                <div><b>Skills</b> Stealth +4, Perception +3</div>
-                <div><b>Damage Immunities</b> Bludgeoning</div>
-                <div><b>Damage Resistances</b> Poison</div>
+                <div><b>Damage Vulnerabilities</b> Bludgeoning</div>
+                <div><b>Damage Immunities</b> Poison</div>
                 <div><b>Condition Immunities</b> Exhaustion, Poisoned</div>
                 <div><b>Senses</b> Darkvision 60 ft.</div>
                 <div><b>Languages</b> Understands all languages it knew in life but can't speak</div>
@@ -95,22 +106,22 @@ export function StatBlock() {
             {/* actions */}
             <div className={`${styles.cardSection} ${styles.actions}`}>
                 <h2>Actions</h2>
-                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) piercing damage.</div>
-                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> +4 to hit, range 80/320 ft., one target. Hit: 5 (1d6 + 2) piercing damage.</div>
+                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, reach 5 ft., one target. Hit: 5 <button className={styles.button}>(1d6) + 2</button> piercing damage.</div>
+                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, range 80/320 ft., one target. Hit: 5 <button className={styles.button}>(1d6) + 2</button> piercing damage.</div>
             </div>
 
             {/* bonus actions */}
             <div className={`${styles.cardSection} ${styles.actions}`}>
                 <h2>Bonus Actions</h2>
-                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) piercing damage.</div>
-                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> +4 to hit, range 80/320 ft., one target. Hit: 5 (1d6 + 2) piercing damage.</div>
+                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, reach 5 ft., one target. Hit: 5 <button className={styles.button}>(1d6) + 2</button> piercing damage.</div>
+                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, range 80/320 ft., one target. Hit: 5 <button className={styles.button}>(1d6) + 2</button> piercing damage.</div>
             </div>
 
             {/* reactions */}
             <div className={`${styles.cardSection} ${styles.actions}`}>
                 <h2>Reactions</h2>
-                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) piercing damage.</div>
-                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> +4 to hit, range 80/320 ft., one target. Hit: 5 (1d6 + 2) piercing damage.</div>
+                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, reach 5 ft., one target. Hit: 5 <button className={styles.button}>(1d6) + 2</button> piercing damage.</div>
+                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, range 80/320 ft., one target. Hit: 5 <button className={styles.button}>(1d6) + 2</button> piercing damage.</div>
             </div>
         </div>
 

@@ -53,6 +53,7 @@
 .actions > h2 {
     font-size: 21px;
     padding: 5px 0;
+    margin-bottom: 5px;
     border-bottom: 1px solid rgb(146,38,16);
 }
 
@@ -74,6 +75,6 @@
     background-color: rgb(240, 240, 240);
 }
 
-.button:active {
-    background-color: rgb(231, 231, 231);
+.button:focus {
+    outline: 1px solid black;
 }
