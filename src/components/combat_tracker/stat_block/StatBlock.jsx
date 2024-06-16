@@ -2,7 +2,7 @@ import styles from "./StatBlock.module.css"
 import { exampleMonsterObj } from "../../../utils/constants"
 import { useState } from "react"
 
-export function StatBlock({  }) {
+export function StatBlock({ monster }) {
 
     // carefully format the jsx so it's as readable as possible. it's getting cluttered fast lol
     // need to compile a list of properties that need to be parsed out. right now it's only the "1d8+4" shit
@@ -10,7 +10,7 @@ export function StatBlock({  }) {
     // think of good place to cleanly keep logic that determines whether or not to add a section to the stat block
     // lil note: each spell has a url to this api so i can easily have definitions ready :) i'm sure there are other properties like this too
     
-    const monster = exampleMonsterObj
+    // const monster = exampleMonsterObj
 
     const [roll, setRoll] = useState({
         showRoll: false,
@@ -47,6 +47,13 @@ export function StatBlock({  }) {
             rollsDisplay: "",
             finalResult: null
         })
+    }
+
+    const fetchInfoTest = async (apiUrl) => {
+        const response = await fetch(`https://www.dnd5eapi.co${apiUrl}`)
+        const responseObj = await response.json()
+        // responseObj.desc is an array, so check what all may be in there. air elemental is a good test monster
+        console.log(responseObj.desc)
     }
 
 
@@ -100,8 +107,16 @@ export function StatBlock({  }) {
 
             {/* ac, hp, speed (base stats) */}
             <div className={`${styles.cardSection} ${styles.baseStats}`}>
-                <div><b>Armor Class</b> {monster.armor_class[0].value} ({monster.armor_class[0].desc})</div>
-                <div><b>Hit Points</b> {monster.hit_points} <button className={styles.button}>({monster.hit_points_roll.die_count}d{monster.hit_points_roll.die} + {monster.hit_points_roll.bonus})</button></div>
+                <div><b>Armor Class</b> {monster.armor_class[0].value} ({monster.armor_class[0].desc ? monster.armor_class[0].desc : monster.armor_class[0].type})</div>
+                <div>
+                    <span><b>Hit Points</b> {monster.hit_points} </span>
+                    <button
+                        className={styles.button}
+                        onClick={() => rollDice(monster.hit_points_roll_obj.die_count, monster.hit_points_roll_obj.die, monster.hit_points_roll_obj.bonus)}
+                    >
+                        ({monster.hit_points_roll})
+                    </button>
+                </div>
                 <div><b>Speed</b> {monster.speed.walk}</div>
             </div>
             <div className={styles.divider}>
@@ -184,8 +199,39 @@ export function StatBlock({  }) {
             {/* skills, proficiencies, etc. */}
             <div className={`${styles.cardSection} ${styles.skillsProficiencies}`}>
                 <div><b>Damage Vulnerabilities</b> Bludgeoning</div>
-                <div><b>Damage Immunities</b> Poison</div>
-                <div><b>Condition Immunities</b> Exhaustion, Poisoned</div>
+                {
+                    monster.damage_immunities.length > 0
+                        ? <div>
+                            <span><b>Damage Immunities</b> </span>
+                            {
+                                monster.damage_immunities.map((di, index) => {
+                                    return <span key={`stat_block_damage_immunity-${index}`}>
+                                        {di.charAt(0).toUpperCase() + di.slice(1)}
+                                        {index < monster.damage_immunities.length - 1 ? ", ": ""}
+                                    </span>
+                                })
+                            }
+                        </div>
+                        : ""
+                }
+                {
+                    monster.condition_immunities.length > 0
+                        ? <div>
+                            <span><b>Condition Immunities</b> </span>
+                            {
+                                monster.condition_immunities.map((ci, index) => {
+                                    return <span
+                                        key={`stat_block_condition_immunity-${index}`}
+                                        onClick={() => fetchInfoTest(ci.url)}
+                                    >
+                                        {ci.name.charAt(0).toUpperCase() + ci.name.slice(1)}
+                                        {index < monster.condition_immunities.length - 1 ? ", ": ""}
+                                    </span>
+                                })
+                            }
+                        </div>
+                        : ""
+                }
                 <div><b>Senses</b> Darkvision 60 ft.</div>
                 <div><b>Languages</b> Understands all languages it knew in life but can't speak</div>
                 <div className="flex gap-8">
@@ -205,22 +251,22 @@ export function StatBlock({  }) {
             {/* actions */}
             <div className={`${styles.cardSection} ${styles.actions}`}>
                 <h2>Actions</h2>
-                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, reach 5 ft., one target. Hit: 5 <button className={styles.button}>(1d6) + 2</button> piercing damage.</div>
-                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, range 80/320 ft., one target. Hit: 5 <button className={styles.button}>(1d6) + 2</button> piercing damage.</div>
+                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, reach 5 ft., one target. Hit: 5 <button className={styles.button}>(1d6)+2</button> piercing damage.</div>
+                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, range 80/320 ft., one target. Hit: 5 <button className={styles.button}>(1d6)+2</button> piercing damage.</div>
             </div>
 
             {/* bonus actions */}
             <div className={`${styles.cardSection} ${styles.actions}`}>
                 <h2>Bonus Actions</h2>
-                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, reach 5 ft., one target. Hit: 5 <button className={styles.button}>(1d6) + 2</button> piercing damage.</div>
-                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, range 80/320 ft., one target. Hit: 5 <button className={styles.button}>(1d6) + 2</button> piercing damage.</div>
+                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, reach 5 ft., one target. Hit: 5 <button className={styles.button}>(1d6)+2</button> piercing damage.</div>
+                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, range 80/320 ft., one target. Hit: 5 <button className={styles.button}>(1d6)+2</button> piercing damage.</div>
             </div>
 
             {/* reactions */}
             <div className={`${styles.cardSection} ${styles.actions}`}>
                 <h2>Reactions</h2>
-                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, reach 5 ft., one target. Hit: 5 <button className={styles.button}>(1d6) + 2</button> piercing damage.</div>
-                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, range 80/320 ft., one target. Hit: 5 <button className={styles.button}>(1d6) + 2</button> piercing damage.</div>
+                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, reach 5 ft., one target. Hit: 5 <button className={styles.button}>(1d6)+2</button> piercing damage.</div>
+                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, range 80/320 ft., one target. Hit: 5 <button className={styles.button}>(1d6)+2</button> piercing damage.</div>
             </div>
         </div>
 

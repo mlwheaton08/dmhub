@@ -48,8 +48,8 @@ export const exampleMonsterObj = {
     ],
     hit_points: 13,
     hit_dice: "2d8",
-    // hit_points_roll: "2d8+4",
-    hit_points_roll: {
+    hit_points_roll: "2d8+4",
+    hit_points_roll_obj: {
         die_count: 2,
         die: 8,
         bonus: 4
@@ -105,8 +105,8 @@ export const exampleMonsterObj = {
                         name: "Piercing",
                         url: "/api/damage-types/piercing"
                     },
-                    // damage_dice: "1d6+2"
-                    damage_dice: {
+                    damage_dice: "1d6+2",
+                    damage_dice_roll_obj: {
                         die_count: 1,
                         die: 6,
                         bonus: 2
@@ -126,8 +126,8 @@ export const exampleMonsterObj = {
                         name: "Piercing",
                         url: "/api/damage-types/piercing"
                     },
-                    // damage_dice: "1d6+2"
-                    damage_dice: {
+                    damage_dice: "1d6+2",
+                    damage_dice_roll_obj: {
                         dieCount: 1,
                         die: 6,
                         bonus: 2
