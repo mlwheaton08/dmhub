@@ -48,6 +48,66 @@ export function SearchBar({ setMonster }) {
         return outputObj
     }
 
+    const convertActionDescriptionToObj = (action) => {
+        // const exampleAction = {
+        //     attack_bonus: 17,
+        //     damage: [
+        //         {damage_dice: "2d10+10"},
+        //         {damage_dice: "4d6"}
+        //     ],
+        //     desc: "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage."
+        // }
+        const a = action
+
+        // format damage dice to match the description (include the space)
+        const actionHasAttackBonus = Object.hasOwn(a, "attack_bonus") && !isNaN(a.attack_bonus)
+        const actionHasDamage = Object.hasOwn(a, "damage") && a.damage.length > 0
+        if (actionHasDamage) for (const d of a.damage) d.damage_dice_formatted = d.damage_dice.split("+").join(" + ")
+
+        const descriptionObj = {
+            preBonus: "",
+            preDamage: [""],
+            remainder: ""
+        }
+
+        // attack bonus
+        if (actionHasAttackBonus) descriptionObj.preBonus = a.desc.slice(0, a.desc.indexOf(a.attack_bonus) - 1)
+
+        // damage
+        if (actionHasDamage) {
+            a.damage.map((d, index) => {
+                if (index > 0) descriptionObj.preDamage[index] = a.desc.slice(a.desc.indexOf(a.damage[index - 1].damage_dice_formatted) + a.damage[index - 1].damage_dice_formatted.length + 1, a.desc.indexOf(d.damage_dice_formatted) - 1)
+                else {
+                    if (actionHasAttackBonus) descriptionObj.preDamage[index] = a.desc.slice(a.desc.indexOf(a.attack_bonus) + a.attack_bonus.toString().length, a.desc.indexOf(d.damage_dice_formatted) - 1)
+                    else descriptionObj.preDamage[index] = a.desc.slice(0, a.desc.indexOf(d.damage_dice_formatted) - 1)
+                }
+            })
+        }
+
+        // remainder
+        if (!actionHasAttackBonus && !actionHasDamage) descriptionObj.remainder = a.desc
+        else if (actionHasAttackBonus && !actionHasDamage) descriptionObj.remainder = a.desc.slice(a.desc.indexOf(a.attack_bonus) + a.attack_bonus.toString().length)
+        else if (actionHasDamage) descriptionObj.remainder = a.desc.slice(a.desc.indexOf(a.damage[a.damage.length - 1].damage_dice_formatted) + a.damage[a.damage.length - 1].damage_dice_formatted.toString().length + 1)
+        else if (actionHasDamage) {
+            // be sure to start from that LAST damage index, since it's an array
+        } else {
+            descriptionObj.remainder = a.desc
+        }
+
+        return descriptionObj
+    }
+
+    // console.log(convertActionDescriptionToObj(
+    //     {
+    //         attack_bonus: 17,
+    //         damage: [
+    //             {damage_dice: "2d10+10"},
+    //             {damage_dice: "4d6"}
+    //         ],
+    //         desc: "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage."
+    //     }
+    // ))
+
     const formatMonsterObj = (m) => {
         // creating a copy. idk if i need this or not
         const monsterObj = m
@@ -55,7 +115,8 @@ export function SearchBar({ setMonster }) {
         monsterObj.hit_points_roll_obj = convertRollStringToObj(monsterObj.hit_points_roll)
         // actions
         monsterObj.actions.map((a) => {
-            if (a.hasOwnProperty('damage')) a.damage.map((d) => {
+            a.desc_obj = convertActionDescriptionToObj(a)
+            if (a.hasOwnProperty('damage') && a.damage.length > 0) a.damage.map((d) => {
                 d.damage_dice_roll_obj = convertRollStringToObj(d.damage_dice)
             })
         })

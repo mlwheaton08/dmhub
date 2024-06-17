@@ -65,48 +65,6 @@ export function StatBlock({ monster }) {
         })
     }
 
-    const actionDescriptionToObj = (action) => {
-        // const exampleAction = {
-        //     attack_bonus: 17,
-        //     damage: [
-        //         {damage_dice: "2d10+10"},
-        //         {damage_dice: "4d6"}
-        //     ],
-        //     desc: "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage."
-        // }
-        const a = action
-
-        // format damage dice to match the description (include the space)
-        for (const d of a.damage) d.damage_dice_formatted = d.damage_dice.split("+").join(" + ")
-        const actionHasAttackBonus = Object.hasOwn(a, "attack_bonus") && !isNaN(a.attack_bonus)
-        const actionHasDamage = Object.hasOwn(a, "damage") && a.damage.length > 0
-
-        const descriptionObj = {
-            preBonus: "",
-            preDamage: [""],
-            remainder: ""
-        }
-
-        if (actionHasAttackBonus) descriptionObj.preBonus = a.desc.slice(0, a.desc.indexOf(a.attack_bonus) - 1)
-        // need to loop through damage (it's an array)
-        if (actionHasDamage) {
-            if (actionHasAttackBonus) descriptionObj.preDamage[0] = a.desc.slice(a.desc.indexOf(a.attack_bonus) + a.attack_bonus.toString().length, a.desc.indexOf(a.damage[0].damage_dice_formatted) - 1)
-            else descriptionObj.preDamage[0] = a.desc.slice(0, a.desc.indexOf(a.damage[0].damage_dice_formatted) - 1)
-        }
-        return descriptionObj
-    }
-
-    console.log(actionDescriptionToObj(
-        {
-            attack_bonus: 17,
-            damage: [
-                {damage_dice: "2d10+10"},
-                {damage_dice: "4d6"}
-            ],
-            desc: "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage."
-        }
-    ))
-
     const fetchInfoTest = async (apiUrl) => {
         const response = await fetch(`https://www.dnd5eapi.co${apiUrl}`)
         const responseObj = await response.json()
@@ -416,7 +374,35 @@ export function StatBlock({ monster }) {
                                 className="my-2"
                             >
                                 <span><i><b>{a.name}.</b></i> </span>
-                                <span>{a.desc}</span>
+                                <span>
+                                    {
+                                        a.desc_obj.preBonus === ""
+                                        ? ""
+                                        : <span>
+                                            <span>{a.desc_obj.preBonus}</span>
+                                            <button
+                                                className={styles.button}
+                                                onClick={() => rollDice(1, 20, a.attack_bonus)}
+                                            >
+                                                {a.attack_bonus < 0 ? "-" : "+"}{a.attack_bonus}
+                                            </button>
+                                        </span>
+                                    }
+                                    {
+                                        a.desc_obj.preDamage.map((pd, i) => {
+                                            if (pd !== "") return <span key={`stat_block_action_desc_obj_preDamage-${i}`}>
+                                                <span>{a.desc_obj.preDamage}</span>
+                                                <button
+                                                    className={styles.button}
+                                                    onClick={() => rollDice(a.damage[i].damage_dice_roll_obj.dice_count, a.damage[i].damage_dice_roll_obj.die, a.damage[i].damage_dice_roll_obj.modifier)}
+                                                >
+                                                    ({a.damage[i].damage_dice})
+                                                </button>
+                                            </span>
+                                        })
+                                    }
+                                    <span>{a.desc_obj.remainder}</span>
+                                </span>
                             </div>
                         })
                     }
