@@ -13,16 +13,19 @@ export function RollPopup({ roll, setRoll }) {
 
 
     return <div className={`${styles.main} ${roll.showRoll ? "" : styles.hide}`}>
-        <div className="text-sm text-gray-500">
-            {roll.diceCount}
-            d{roll.die}
-            {
-                roll.modifier === null
-                ? ""
-                : roll.modifier < 0
-                    ? roll.modifier
-                    : `+${roll.modifier}`
-            }
+        <div className="flex gap-4 text-sm text-gray-500">
+            <span><i>{roll.rollType}</i></span>
+            <span>
+                {roll.diceCount}
+                d{roll.die}
+                {
+                    roll.modifier === null
+                    ? ""
+                    : roll.modifier < 0
+                        ? roll.modifier
+                        : `+${roll.modifier}`
+                }
+            </span>
         </div>
         <div className="border-b">
             <span>

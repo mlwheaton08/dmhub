@@ -12,6 +12,7 @@ export function CombatTracker2() {
     const [monster, setMonster] = useState({})
     const [roll, setRoll] = useState({
         showRoll: false,
+        rollType: "",
         diceCount: null,
         die: null,
         modifier: null,
@@ -20,7 +21,7 @@ export function CombatTracker2() {
         styleCrit: false
     })
 
-    const rollDice = (diceCount, die, modifier, styleCrit = false) => {
+    const rollDice = (rollType, diceCount, die, modifier, styleCrit = false) => {
         // make it disappear for a split sec, then reappear with results
         setRoll({
             showRoll: false,
@@ -41,6 +42,7 @@ export function CombatTracker2() {
         }
         
         copy.showRoll = true
+        copy.rollType = rollType
         copy.diceCount = diceCount
         copy.die = die
         // copy.modifier = `${modifier < 0 ? "-" : "+"} ${Math.abs(modifier)}`

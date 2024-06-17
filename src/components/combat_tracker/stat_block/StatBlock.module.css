@@ -15,7 +15,7 @@
     width: 99%;
     padding: 15px;
     background-color: rgb(253,241,220);
-    color: rgb(146,38,16);
+    color: rgb(130,32,0);
     box-shadow: 0 0 15px black;
 }
 
@@ -24,7 +24,7 @@
     height: 21px;
     display: flex;
     align-items: center;
-    /* background-color: rgb(146,38,16); */
+    /* background-color: rgb(130,32,0); */
 }
 
 .header > h1 {
@@ -54,7 +54,7 @@
     font-size: 21px;
     padding: 5px 0;
     margin-bottom: 5px;
-    border-bottom: 1px solid rgb(146,38,16);
+    border-bottom: 1px solid rgb(130,32,0);
 }
 
 .actions > div {
@@ -64,9 +64,9 @@
 .button {
     padding: 0 2px;
     background-color: white;
-    border: 1px solid rgb(146,38,16);
+    border: 1px solid rgb(130,32,0);
     border-radius: 4px;
-    color: 1px solid rgb(146,38,16);
+    color: 1px solid rgb(130,32,0);
     font-weight: 500;
     font-size: 14px;
 }

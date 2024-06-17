@@ -4,19 +4,10 @@ import { useState } from "react"
 
 export function StatBlock({ monster, rollDice }) {
 
-    // --- actions ---
-        // loop
-            // if action has attack bonus and damage (note: i think the other option is damage with no attack bonus)
-                // if action has no attack bonus, does have damage
-                    // <span>first part of action.description</span>
-                    // <button>attack bonus</button>
-                    // <span>middle part of action.description</span>
-                // else
-                    // <span>first part of action.description</span> (split string up to damage)
-                // <button>damage</button>
-                // <span>last part of action.description</span>
-            // else
-                // <span>action.description</span>
+    // sctions parsing not quite complete. some damage arrays have more options that go deeper to determine damage
+        // hobgoblin is what threw this error
+    // i still need skills displaying (under proficiencies)
+    // subtype in parentheses in header (checkout dndbeyond goblin)
     // urls that show content when clicked (in a sidebar?)
         // when the api is hit (clicked the word with url link), may want to add that content to another variable (so that it doesn't have to hit api every single time it's clicked. basically loads it up once and keeps it)
 
@@ -41,7 +32,7 @@ export function StatBlock({ monster, rollDice }) {
             {/* header */}
             <div className={`${styles.cardSection} ${styles.header}`}>
                 <h1>{monster.name}</h1>
-                <h2><i>{monster.size} {monster.type}, {monster.alignment}</i></h2>
+                <h2><i>{monster.size} {monster.type}{Object.hasOwn(monster, "subtype") && monster.subtype ? ` (${monster.subtype})` : ""}, {monster.alignment}</i></h2>
             </div>
             <div className={styles.divider}>
                 <img src="https://media-waterdeep.cursecdn.com/file-attachments/0/579/stat-block-header-bar.svg"></img>
@@ -54,7 +45,7 @@ export function StatBlock({ monster, rollDice }) {
                     <span><b>Hit Points</b> {monster.hit_points} </span>
                     <button
                         className={styles.button}
-                        onClick={() => rollDice(monster.hit_points_roll_obj.dice_count, monster.hit_points_roll_obj.die, monster.hit_points_roll_obj.modifier)}
+                        onClick={() => rollDice("HP", monster.hit_points_roll_obj.dice_count, monster.hit_points_roll_obj.die, monster.hit_points_roll_obj.modifier)}
                     >
                         ({monster.hit_points_roll})
                     </button>
@@ -84,7 +75,7 @@ export function StatBlock({ monster, rollDice }) {
                     <div>
                         <button
                             className={styles.button}
-                            onClick={() => rollDice(1, 20, Math.floor((monster.strength - 10) / 2), true)}
+                            onClick={() => rollDice("STR", 1, 20, Math.floor((monster.strength - 10) / 2), true)}
                         >
                             {displayAbilityScore(monster.strength)}
                         </button>
@@ -95,7 +86,7 @@ export function StatBlock({ monster, rollDice }) {
                     <div>
                     <button
                             className={styles.button}
-                            onClick={() => rollDice(1, 20, Math.floor((monster.dexterity - 10) / 2), true)}
+                            onClick={() => rollDice("DEX", 1, 20, Math.floor((monster.dexterity - 10) / 2), true)}
                         >
                             {displayAbilityScore(monster.dexterity)}
                         </button>
@@ -106,7 +97,7 @@ export function StatBlock({ monster, rollDice }) {
                     <div>
                     <button
                             className={styles.button}
-                            onClick={() => rollDice(1, 20, Math.floor((monster.constitution - 10) / 2), true)}
+                            onClick={() => rollDice("CON", 1, 20, Math.floor((monster.constitution - 10) / 2), true)}
                         >
                             {displayAbilityScore(monster.constitution)}
                         </button>
@@ -117,7 +108,7 @@ export function StatBlock({ monster, rollDice }) {
                     <div>
                     <button
                             className={styles.button}
-                            onClick={() => rollDice(1, 20, Math.floor((monster.intelligence - 10) / 2), true)}
+                            onClick={() => rollDice("INT", 1, 20, Math.floor((monster.intelligence - 10) / 2), true)}
                         >
                             {displayAbilityScore(monster.intelligence)}
                         </button>
@@ -128,7 +119,7 @@ export function StatBlock({ monster, rollDice }) {
                     <div>
                     <button
                             className={styles.button}
-                            onClick={() => rollDice(1, 20, Math.floor((monster.wisdom - 10) / 2), true)}
+                            onClick={() => rollDice("WIS", 1, 20, Math.floor((monster.wisdom - 10) / 2), true)}
                         >
                             {displayAbilityScore(monster.wisdom)}
                         </button>
@@ -139,7 +130,7 @@ export function StatBlock({ monster, rollDice }) {
                     <div>
                     <button
                             className={styles.button}
-                            onClick={() => rollDice(1, 20, Math.floor((monster.charisma - 10) / 2), true)}
+                            onClick={() => rollDice("CHA", 1, 20, Math.floor((monster.charisma - 10) / 2), true)}
                         >
                             {displayAbilityScore(monster.charisma)}
                         </button>
@@ -285,7 +276,7 @@ export function StatBlock({ monster, rollDice }) {
                                             <span>{a.desc_obj.preBonus}</span>
                                             <button
                                                 className={styles.button}
-                                                onClick={() => rollDice(1, 20, a.attack_bonus, true)}
+                                                onClick={() => rollDice("To hit", 1, 20, a.attack_bonus, true)}
                                             >
                                                 {a.attack_bonus < 0 ? "-" : "+"}{a.attack_bonus}
                                             </button>
@@ -297,7 +288,7 @@ export function StatBlock({ monster, rollDice }) {
                                                 <span>{a.desc_obj.preDamage}</span>
                                                 <button
                                                     className={styles.button}
-                                                    onClick={() => rollDice(a.damage[i].damage_dice_roll_obj.dice_count, a.damage[i].damage_dice_roll_obj.die, a.damage[i].damage_dice_roll_obj.modifier)}
+                                                    onClick={() => rollDice("Damage", a.damage[i].damage_dice_roll_obj.dice_count, a.damage[i].damage_dice_roll_obj.die, a.damage[i].damage_dice_roll_obj.modifier)}
                                                 >
                                                     ({a.damage[i].damage_dice})
                                                 </button>
@@ -333,7 +324,7 @@ export function StatBlock({ monster, rollDice }) {
                                             <span>{la.desc_obj.preBonus}</span>
                                             <button
                                                 className={styles.button}
-                                                onClick={() => rollDice(1, 20, la.attack_bonus, true)}
+                                                onClick={() => rollDice("To hit", 1, 20, la.attack_bonus, true)}
                                             >
                                                 {la.attack_bonus < 0 ? "-" : "+"}{la.attack_bonus}
                                             </button>
@@ -345,7 +336,7 @@ export function StatBlock({ monster, rollDice }) {
                                                 <span>{la.desc_obj.preDamage}</span>
                                                 <button
                                                     className={styles.button}
-                                                    onClick={() => rollDice(la.damage[i].damage_dice_roll_obj.dice_count, la.damage[i].damage_dice_roll_obj.die, la.damage[i].damage_dice_roll_obj.modifier)}
+                                                    onClick={() => rollDice("Damage", la.damage[i].damage_dice_roll_obj.dice_count, la.damage[i].damage_dice_roll_obj.die, la.damage[i].damage_dice_roll_obj.modifier)}
                                                 >
                                                     ({la.damage[i].damage_dice})
                                                 </button>
