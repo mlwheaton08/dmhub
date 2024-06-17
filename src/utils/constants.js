@@ -52,7 +52,7 @@ export const exampleMonsterObj = {
     hit_points_roll_obj: {
         die_count: 2,
         die: 8,
-        bonus: 4
+        modifier: 4
     },
     // remember there are other speed types (swim, fly, etc.)
     speed: {
@@ -109,7 +109,7 @@ export const exampleMonsterObj = {
                     damage_dice_roll_obj: {
                         die_count: 1,
                         die: 6,
-                        bonus: 2
+                        modifier: 2
                     }
                 }
             ],
@@ -130,7 +130,7 @@ export const exampleMonsterObj = {
                     damage_dice_roll_obj: {
                         dieCount: 1,
                         die: 6,
-                        bonus: 2
+                        modifier: 2
                     }
                 }
             ],

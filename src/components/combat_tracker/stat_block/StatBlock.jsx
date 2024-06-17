@@ -4,19 +4,30 @@ import { useState } from "react"
 
 export function StatBlock({ monster }) {
 
-    // carefully format the jsx so it's as readable as possible. it's getting cluttered fast lol
-    // need to compile a list of properties that need to be parsed out. right now it's only the "1d8+4" shit
-    // still need sections for other things (like spells)
-    // think of good place to cleanly keep logic that determines whether or not to add a section to the stat block
-    // lil note: each spell has a url to this api so i can easily have definitions ready :) i'm sure there are other properties like this too
-    
-    // const monster = exampleMonsterObj
+    // --- actions ---
+        // loop
+            // if action has attack bonus and damage (note: i think the other option is damage with no attack bonus)
+                // if action has no attack bonus, does have damage
+                    // <span>first part of action.description</span>
+                    // <button>attack bonus</button>
+                    // <span>middle part of action.description</span>
+                // else
+                    // <span>first part of action.description</span> (split string up to damage)
+                // <button>damage</button>
+                // <span>last part of action.description</span>
+            // else
+                // <span>action.description</span>
+    // urls that show content when clicked (in a sidebar?)
+        // when the api is hit (clicked the word with url link), may want to add that content to another variable (so that it doesn't have to hit api every single time it's clicked. basically loads it up once and keeps it)
 
     const [roll, setRoll] = useState({
         showRoll: false,
-        bonusDisplay: "",
-        rollsDisplay: "",
-        finalResult: null
+        diceCount: null,
+        die: null,
+        modifier: null,
+        rolls: [],
+        finalResult: null,
+        styleCrit: false
     })
 
     const displayAbilityScore = (abilityScore) => {
@@ -24,7 +35,7 @@ export function StatBlock({ monster }) {
         return `${abilityScore} (${modifier})` // ex: "14 (+2)"
     }
 
-    const rollDice = (diceCount, die, bonus) => {
+    const rollDice = (diceCount, die, modifier, styleCrit = true) => {
         const copy = {...roll}
         
         // roll dice
@@ -34,20 +45,67 @@ export function StatBlock({ monster }) {
         }
         
         copy.showRoll = true
-        copy.bonusDisplay = `${bonus < 0 ? "-" : "+"} ${Math.abs(bonus)}`
-        copy.rollsDisplay = rolls.join(" + ")
-        copy.finalResult = rolls.reduce((a, b) => a + b, 0) + bonus
+        copy.diceCount = diceCount
+        copy.die = die
+        // copy.modifier = `${modifier < 0 ? "-" : "+"} ${Math.abs(modifier)}`
+        copy.modifier = modifier
+        // copy.rolls = rolls.join(" + ")
+        copy.rolls = rolls
+        copy.finalResult = rolls.reduce((a, b) => a + b, 0) + modifier
+        copy.styleCrit = styleCrit
         setRoll(copy)
     }
 
     const clearRollState = (showRoll) => {
         setRoll({
             showRoll: showRoll,
-            bonusDisplay: "",
-            rollsDisplay: "",
+            modifier: "",
+            rolls: "",
             finalResult: null
         })
     }
+
+    const actionDescriptionToObj = (action) => {
+        // const exampleAction = {
+        //     attack_bonus: 17,
+        //     damage: [
+        //         {damage_dice: "2d10+10"},
+        //         {damage_dice: "4d6"}
+        //     ],
+        //     desc: "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage."
+        // }
+        const a = action
+
+        // format damage dice to match the description (include the space)
+        for (const d of a.damage) d.damage_dice_formatted = d.damage_dice.split("+").join(" + ")
+        const actionHasAttackBonus = Object.hasOwn(a, "attack_bonus") && !isNaN(a.attack_bonus)
+        const actionHasDamage = Object.hasOwn(a, "damage") && a.damage.length > 0
+
+        const descriptionObj = {
+            preBonus: "",
+            preDamage: [""],
+            remainder: ""
+        }
+
+        if (actionHasAttackBonus) descriptionObj.preBonus = a.desc.slice(0, a.desc.indexOf(a.attack_bonus) - 1)
+        // need to loop through damage (it's an array)
+        if (actionHasDamage) {
+            if (actionHasAttackBonus) descriptionObj.preDamage[0] = a.desc.slice(a.desc.indexOf(a.attack_bonus) + a.attack_bonus.toString().length, a.desc.indexOf(a.damage[0].damage_dice_formatted) - 1)
+            else descriptionObj.preDamage[0] = a.desc.slice(0, a.desc.indexOf(a.damage[0].damage_dice_formatted) - 1)
+        }
+        return descriptionObj
+    }
+
+    console.log(actionDescriptionToObj(
+        {
+            attack_bonus: 17,
+            damage: [
+                {damage_dice: "2d10+10"},
+                {damage_dice: "4d6"}
+            ],
+            desc: "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage."
+        }
+    ))
 
     const fetchInfoTest = async (apiUrl) => {
         const response = await fetch(`https://www.dnd5eapi.co${apiUrl}`)
@@ -58,15 +116,38 @@ export function StatBlock({ monster }) {
 
 
     return <div className={styles.main}>
-        {/* Roll */}
+        {/* Roll .. this needs to be own component */}
         {
             <div className={`${roll.showRoll ? "" : "hidden"} fixed bottom-4 right-4 flex flex-col items-center gap-1 px-6 py-4 rounded bg-black`}>
                 {
                     roll.finalResult === null
                         ? <span>Roll results will appear here</span>
                         : <>
-                            <div className="border-b">{roll.rollsDisplay} <b>{roll.bonusDisplay}</b></div>
-                            <div className="text-4xl font-semibold text-red-500">{roll.finalResult}</div>
+                            <div className="border-b">
+                                <span>
+                                    {
+                                        roll.rolls.map((r, index) => {
+                                            return <span key={`stat_block_roll-${index}`}>
+                                                {
+                                                    roll.styleCrit
+                                                    ? <span className={`${r === 1 ? "text-red-500" : ""} ${r === roll.die ? "text-green-500" : ""}`}>{r}</span>
+                                                    : <span>{r}</span>
+                                                }
+                                                <span>
+
+                                                </span>
+                                                <span>{index < roll.rolls.length - 1 ? " + " : ""}</span>
+                                            </span>
+                                        })
+                                    }
+                                </span>
+                                {
+                                    roll.modifier === null
+                                    ? ""
+                                    : <span><b> {roll.modifier < 0 ? "-" : "+"} {Math.abs(roll.modifier)}</b></span>
+                                }
+                            </div>
+                            <div className="text-4xl font-semibold">{roll.finalResult}</div>
 
                             {/* - */}
                             {/* <svg
@@ -112,12 +193,24 @@ export function StatBlock({ monster }) {
                     <span><b>Hit Points</b> {monster.hit_points} </span>
                     <button
                         className={styles.button}
-                        onClick={() => rollDice(monster.hit_points_roll_obj.die_count, monster.hit_points_roll_obj.die, monster.hit_points_roll_obj.bonus)}
+                        onClick={() => rollDice(monster.hit_points_roll_obj.dice_count, monster.hit_points_roll_obj.die, monster.hit_points_roll_obj.modifier)}
                     >
                         ({monster.hit_points_roll})
                     </button>
                 </div>
-                <div><b>Speed</b> {monster.speed.walk}</div>
+                <div>
+                    <span><b>Speed</b> </span>
+                    <span>
+                        {
+                            Object.keys(monster.speed).map((key, index) => {
+                                return <span key={`stat_block_sense-${index}`}>
+                                    {`${key !== "walk" ? key.charAt(0).toUpperCase() + key.slice(1) : ""} ${monster.speed[key]}`}
+                                    {index < Object.keys(monster.speed).length - 1 ? " | " : ""}
+                                </span>
+                            })
+                        }
+                    </span>
+                </div>
             </div>
             <div className={styles.divider}>
                 <img src="https://media-waterdeep.cursecdn.com/file-attachments/0/579/stat-block-header-bar.svg"></img>
@@ -198,7 +291,21 @@ export function StatBlock({ monster }) {
 
             {/* skills, proficiencies, etc. */}
             <div className={`${styles.cardSection} ${styles.skillsProficiencies}`}>
-                <div><b>Damage Vulnerabilities</b> Bludgeoning</div>
+                {
+                    monster.damage_vulnerabilities.length > 0
+                        ? <div>
+                            <span><b>Damage Vulnerabilities</b> </span>
+                            {
+                                monster.damage_vulnerabilities.map((dv, index) => {
+                                    return <span key={`stat_block_damage_immunity-${index}`}>
+                                        {dv.charAt(0).toUpperCase() + dv.slice(1)}
+                                        {index < monster.damage_vulnerabilities.length - 1 ? " | " : ""}
+                                    </span>
+                                })
+                            }
+                        </div>
+                        : ""
+                }
                 {
                     monster.damage_immunities.length > 0
                         ? <div>
@@ -207,7 +314,22 @@ export function StatBlock({ monster }) {
                                 monster.damage_immunities.map((di, index) => {
                                     return <span key={`stat_block_damage_immunity-${index}`}>
                                         {di.charAt(0).toUpperCase() + di.slice(1)}
-                                        {index < monster.damage_immunities.length - 1 ? ", ": ""}
+                                        {index < monster.damage_immunities.length - 1 ? " | " : ""}
+                                    </span>
+                                })
+                            }
+                        </div>
+                        : ""
+                }
+                {
+                    monster.damage_resistances.length > 0
+                        ? <div>
+                            <span><b>Damage Resistances</b> </span>
+                            {
+                                monster.damage_resistances.map((di, index) => {
+                                    return <span key={`stat_block_damage_resistance-${index}`}>
+                                        {di.charAt(0).toUpperCase() + di.slice(1)}
+                                        {index < monster.damage_resistances.length - 1 ? " | " : ""}
                                     </span>
                                 })
                             }
@@ -225,49 +347,102 @@ export function StatBlock({ monster }) {
                                         onClick={() => fetchInfoTest(ci.url)}
                                     >
                                         {ci.name.charAt(0).toUpperCase() + ci.name.slice(1)}
-                                        {index < monster.condition_immunities.length - 1 ? ", ": ""}
+                                        {index < monster.condition_immunities.length - 1 ? " | " : ""}
                                     </span>
                                 })
                             }
                         </div>
                         : ""
                 }
-                <div><b>Senses</b> Darkvision 60 ft.</div>
-                <div><b>Languages</b> Understands all languages it knew in life but can't speak</div>
+                {
+                    Object.keys(monster.senses).length > 0
+                        ? <div>
+                            <span><b>Senses</b> </span>
+                            {
+                                Object.keys(monster.senses).map((key, index) => {
+                                    return <span key={`stat_block_sense-${index}`}>
+                                        {/* the below code gets ride of "_", capitalizes each word, then adds a space in between */}
+                                        {`${key.split("_").map((k) => k.charAt(0).toUpperCase() + k.slice(1)).join(" ")} ${monster.senses[key]}`}
+                                        {index < Object.keys(monster.senses).length - 1 ? " | " : ""}
+                                    </span>
+                                })
+                            }
+                        </div>
+                        : ""
+                }
+                <div><b>Languages</b> {monster.languages.charAt(0).toUpperCase() + monster.languages.slice(1)}</div>
                 <div className="flex gap-8">
-                    <div><b>Challenge</b> 1/4 (50 XP)</div>
-                    <div><b>Proficiency Bonus</b> +2</div>
+                    <div><b>Challenge</b> {`${monster.challenge_rating_fraction} (${monster.xp} XP)`}</div>
+                    <div><b>Proficiency Bonus</b> +{monster.proficiency_bonus}</div>
                 </div>
             </div>
-            <div className={styles.divider}>
-                <img src="https://media-waterdeep.cursecdn.com/file-attachments/0/579/stat-block-header-bar.svg"></img>
-            </div>
 
-            {/* feats, traits */}
-            <div className={`${styles.cardSection} ${styles.featsTraits}`}>
-                <div><i><b>Keen Smell.</b></i> The cat has advantage on Wisdom (Perception) checks that rely on smell.</div>
-            </div>
+            {
+                monster.special_abilities.length > 0
+                ? <div className={styles.divider}>
+                    <img src="https://media-waterdeep.cursecdn.com/file-attachments/0/579/stat-block-header-bar.svg"></img>
+                </div>
+                : ""
+            }
+
+            {/* special abilities */}
+            {
+                monster.special_abilities.length > 0
+                ? <div className={`${styles.cardSection} ${styles.specialAbilities}`}>
+                    {
+                        monster.special_abilities.map((sa, index) => {
+                            return <div
+                                key={`stat_block_special_ability-${index}`}
+                                className="my-2"
+                            >
+                                <span><i><b>{sa.name}.</b></i> </span>
+                                <span>{sa.desc}</span>
+                            </div>
+                        })
+                    }
+                </div>
+                : ""
+            }
 
             {/* actions */}
-            <div className={`${styles.cardSection} ${styles.actions}`}>
-                <h2>Actions</h2>
-                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, reach 5 ft., one target. Hit: 5 <button className={styles.button}>(1d6)+2</button> piercing damage.</div>
-                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, range 80/320 ft., one target. Hit: 5 <button className={styles.button}>(1d6)+2</button> piercing damage.</div>
-            </div>
+            {
+                monster.actions.length > 0
+                ? <div className={`${styles.cardSection} ${styles.actions}`}>
+                    <h2>Actions</h2>
+                    {
+                        monster.actions.map((a, index) => {
+                            return <div
+                                key={`stat_block_action-${index}`}
+                                className="my-2"
+                            >
+                                <span><i><b>{a.name}.</b></i> </span>
+                                <span>{a.desc}</span>
+                            </div>
+                        })
+                    }
+                </div>
+                : ""
+            }
 
-            {/* bonus actions */}
-            <div className={`${styles.cardSection} ${styles.actions}`}>
-                <h2>Bonus Actions</h2>
-                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, reach 5 ft., one target. Hit: 5 <button className={styles.button}>(1d6)+2</button> piercing damage.</div>
-                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, range 80/320 ft., one target. Hit: 5 <button className={styles.button}>(1d6)+2</button> piercing damage.</div>
-            </div>
-
-            {/* reactions */}
-            <div className={`${styles.cardSection} ${styles.actions}`}>
-                <h2>Reactions</h2>
-                <div><i><b>Shortsword.</b> Melee Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, reach 5 ft., one target. Hit: 5 <button className={styles.button}>(1d6)+2</button> piercing damage.</div>
-                <div><i><b>Shortbow.</b> Ranged Weapon Attack:</i> <button className={styles.button}>+4</button> to hit, range 80/320 ft., one target. Hit: 5 <button className={styles.button}>(1d6)+2</button> piercing damage.</div>
-            </div>
+            {/* legendary actions */}
+            {
+                monster.legendary_actions.length > 0
+                ? <div className={`${styles.cardSection} ${styles.actions}`}>
+                    <h2>Legendary Actions</h2>
+                    {
+                        monster.legendary_actions.map((la, index) => {
+                            return <div
+                                key={`stat_block_legendary_action-${index}`}
+                                className="my-2"
+                            >
+                                <span><i><b>{la.name}.</b></i> </span>
+                                <span>{la.desc}</span>
+                            </div>
+                        })
+                    }
+                </div>
+                : ""
+            }
         </div>
 
         {/* Bottom Bar */}
