@@ -122,6 +122,7 @@ export function SearchBar({ setMonster }) {
         })
         // legendary actions object
         monsterObj.legendary_actions.map((la) => {
+            la.desc_obj = convertActionDescriptionToObj(la)
             if (la.hasOwnProperty('damage')) la.damage.map((d) => {
                 d.damage_dice_roll_obj = convertRollStringToObj(d.damage_dice)
             })

@@ -1,0 +1,22 @@
+.main {
+    position: fixed;
+    visibility: visible;
+    opacity: 1;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 24px 16px;
+    border-radius: 4px;
+    background-color: black;
+    transition: all 150ms ease-out;
+}
+
+.main.hide {
+    /* opacity: 0; */
+    visibility: hidden;
+    bottom: -100px;
+    transition: all 200ms ease-out;
+}

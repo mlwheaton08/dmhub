@@ -2,7 +2,7 @@ import styles from "./StatBlock.module.css"
 import { exampleMonsterObj } from "../../../utils/constants"
 import { useState } from "react"
 
-export function StatBlock({ monster }) {
+export function StatBlock({ monster, rollDice }) {
 
     // --- actions ---
         // loop
@@ -20,49 +20,9 @@ export function StatBlock({ monster }) {
     // urls that show content when clicked (in a sidebar?)
         // when the api is hit (clicked the word with url link), may want to add that content to another variable (so that it doesn't have to hit api every single time it's clicked. basically loads it up once and keeps it)
 
-    const [roll, setRoll] = useState({
-        showRoll: false,
-        diceCount: null,
-        die: null,
-        modifier: null,
-        rolls: [],
-        finalResult: null,
-        styleCrit: false
-    })
-
     const displayAbilityScore = (abilityScore) => {
         const modifier = `${abilityScore > 10 ? "+" : ""}${Math.floor((abilityScore - 10) / 2)}`
         return `${abilityScore} (${modifier})` // ex: "14 (+2)"
-    }
-
-    const rollDice = (diceCount, die, modifier, styleCrit = true) => {
-        const copy = {...roll}
-        
-        // roll dice
-        const rolls = []
-        for (let n = 1; n <= diceCount; n++) {
-            rolls.push((Math.floor((Math.random() * die) + 1)))
-        }
-        
-        copy.showRoll = true
-        copy.diceCount = diceCount
-        copy.die = die
-        // copy.modifier = `${modifier < 0 ? "-" : "+"} ${Math.abs(modifier)}`
-        copy.modifier = modifier
-        // copy.rolls = rolls.join(" + ")
-        copy.rolls = rolls
-        copy.finalResult = rolls.reduce((a, b) => a + b, 0) + modifier
-        copy.styleCrit = styleCrit
-        setRoll(copy)
-    }
-
-    const clearRollState = (showRoll) => {
-        setRoll({
-            showRoll: showRoll,
-            modifier: "",
-            rolls: "",
-            finalResult: null
-        })
     }
 
     const fetchInfoTest = async (apiUrl) => {
@@ -74,63 +34,6 @@ export function StatBlock({ monster }) {
 
 
     return <div className={styles.main}>
-        {/* Roll .. this needs to be own component */}
-        {
-            <div className={`${roll.showRoll ? "" : "hidden"} fixed bottom-4 right-4 flex flex-col items-center gap-1 px-6 py-4 rounded bg-black`}>
-                {
-                    roll.finalResult === null
-                        ? <span>Roll results will appear here</span>
-                        : <>
-                            <div className="border-b">
-                                <span>
-                                    {
-                                        roll.rolls.map((r, index) => {
-                                            return <span key={`stat_block_roll-${index}`}>
-                                                {
-                                                    roll.styleCrit
-                                                    ? <span className={`${r === 1 ? "text-red-500" : ""} ${r === roll.die ? "text-green-500" : ""}`}>{r}</span>
-                                                    : <span>{r}</span>
-                                                }
-                                                <span>
-
-                                                </span>
-                                                <span>{index < roll.rolls.length - 1 ? " + " : ""}</span>
-                                            </span>
-                                        })
-                                    }
-                                </span>
-                                {
-                                    roll.modifier === null
-                                    ? ""
-                                    : <span><b> {roll.modifier < 0 ? "-" : "+"} {Math.abs(roll.modifier)}</b></span>
-                                }
-                            </div>
-                            <div className="text-4xl font-semibold">{roll.finalResult}</div>
-
-                            {/* - */}
-                            {/* <svg
-                                className="absolute top-1/2 -translate-y-1/2 -left-2 w-4 h-4 bg-black fill-white border border-white rounded-full hover:cursor-pointer hover:fill-yellow-500 hover:border-yellow-500 transition-all duratin-200"
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 448 512"
-                                onClick={() => clearRollState(true)}
-                            >
-                                <path d="M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z"/>
-                            </svg> */}
-                        </>
-                }
-
-                {/* x */}
-                <svg
-                    className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 w-4 h-4 bg-black fill-white border border-white rounded-full hover:cursor-pointer"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 384 512"
-                    onClick={() => clearRollState(false)}
-                >
-                    <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/>
-                </svg>
-            </div>
-        }
-
         {/* Top bar */}
         <div className={styles.bar}></div>
 
@@ -181,7 +84,7 @@ export function StatBlock({ monster }) {
                     <div>
                         <button
                             className={styles.button}
-                            onClick={() => rollDice(1, 20, Math.floor((monster.strength - 10) / 2))}
+                            onClick={() => rollDice(1, 20, Math.floor((monster.strength - 10) / 2), true)}
                         >
                             {displayAbilityScore(monster.strength)}
                         </button>
@@ -192,7 +95,7 @@ export function StatBlock({ monster }) {
                     <div>
                     <button
                             className={styles.button}
-                            onClick={() => rollDice(1, 20, Math.floor((monster.dexterity - 10) / 2))}
+                            onClick={() => rollDice(1, 20, Math.floor((monster.dexterity - 10) / 2), true)}
                         >
                             {displayAbilityScore(monster.dexterity)}
                         </button>
@@ -203,7 +106,7 @@ export function StatBlock({ monster }) {
                     <div>
                     <button
                             className={styles.button}
-                            onClick={() => rollDice(1, 20, Math.floor((monster.constitution - 10) / 2))}
+                            onClick={() => rollDice(1, 20, Math.floor((monster.constitution - 10) / 2), true)}
                         >
                             {displayAbilityScore(monster.constitution)}
                         </button>
@@ -214,7 +117,7 @@ export function StatBlock({ monster }) {
                     <div>
                     <button
                             className={styles.button}
-                            onClick={() => rollDice(1, 20, Math.floor((monster.intelligence - 10) / 2))}
+                            onClick={() => rollDice(1, 20, Math.floor((monster.intelligence - 10) / 2), true)}
                         >
                             {displayAbilityScore(monster.intelligence)}
                         </button>
@@ -225,7 +128,7 @@ export function StatBlock({ monster }) {
                     <div>
                     <button
                             className={styles.button}
-                            onClick={() => rollDice(1, 20, Math.floor((monster.wisdom - 10) / 2))}
+                            onClick={() => rollDice(1, 20, Math.floor((monster.wisdom - 10) / 2), true)}
                         >
                             {displayAbilityScore(monster.wisdom)}
                         </button>
@@ -236,7 +139,7 @@ export function StatBlock({ monster }) {
                     <div>
                     <button
                             className={styles.button}
-                            onClick={() => rollDice(1, 20, Math.floor((monster.charisma - 10) / 2))}
+                            onClick={() => rollDice(1, 20, Math.floor((monster.charisma - 10) / 2), true)}
                         >
                             {displayAbilityScore(monster.charisma)}
                         </button>
@@ -382,7 +285,7 @@ export function StatBlock({ monster }) {
                                             <span>{a.desc_obj.preBonus}</span>
                                             <button
                                                 className={styles.button}
-                                                onClick={() => rollDice(1, 20, a.attack_bonus)}
+                                                onClick={() => rollDice(1, 20, a.attack_bonus, true)}
                                             >
                                                 {a.attack_bonus < 0 ? "-" : "+"}{a.attack_bonus}
                                             </button>
@@ -418,11 +321,39 @@ export function StatBlock({ monster }) {
                     {
                         monster.legendary_actions.map((la, index) => {
                             return <div
-                                key={`stat_block_legendary_action-${index}`}
+                                key={`stat_block_action-${index}`}
                                 className="my-2"
                             >
                                 <span><i><b>{la.name}.</b></i> </span>
-                                <span>{la.desc}</span>
+                                <span>
+                                    {
+                                        la.desc_obj.preBonus === ""
+                                        ? ""
+                                        : <span>
+                                            <span>{la.desc_obj.preBonus}</span>
+                                            <button
+                                                className={styles.button}
+                                                onClick={() => rollDice(1, 20, la.attack_bonus, true)}
+                                            >
+                                                {la.attack_bonus < 0 ? "-" : "+"}{la.attack_bonus}
+                                            </button>
+                                        </span>
+                                    }
+                                    {
+                                        la.desc_obj.preDamage.map((pd, i) => {
+                                            if (pd !== "") return <span key={`stat_block_legendary_action_desc_obj_preDamage-${i}`}>
+                                                <span>{la.desc_obj.preDamage}</span>
+                                                <button
+                                                    className={styles.button}
+                                                    onClick={() => rollDice(la.damage[i].damage_dice_roll_obj.dice_count, la.damage[i].damage_dice_roll_obj.die, la.damage[i].damage_dice_roll_obj.modifier)}
+                                                >
+                                                    ({la.damage[i].damage_dice})
+                                                </button>
+                                            </span>
+                                        })
+                                    }
+                                    <span>{la.desc_obj.remainder}</span>
+                                </span>
                             </div>
                         })
                     }
