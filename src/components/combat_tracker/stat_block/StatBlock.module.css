@@ -1,0 +1,81 @@
+.main {
+    width: 546px;
+    font-size: 15px;
+}
+
+.bar {
+    width: 100%;
+    height: 6px;
+    background-color: rgb(230,154,40);
+    border: 1px solid black;
+}
+
+.card {
+    margin: auto;
+    width: 99%;
+    padding: 15px;
+    background-color: rgb(253,241,220);
+    color: rgb(130,32,0);
+    box-shadow: 0 0 15px black;
+}
+
+.divider {
+    width: 100%;
+    height: 21px;
+    display: flex;
+    align-items: center;
+    /* background-color: rgb(130,32,0); */
+}
+
+.header > h1 {
+    font-size: 30px;
+    font-weight: 500;
+}
+
+.header > h2 {
+    color: black;
+}
+
+.abilities {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.specialAbilities {
+    color: black;
+}
+
+.actions {
+    margin-top: 15px;
+}
+
+.actions > h2 {
+    font-size: 21px;
+    padding: 5px 0;
+    margin-bottom: 5px;
+    border-bottom: 1px solid rgb(130,32,0);
+}
+
+.actions > div {
+    color: black;
+}
+
+.button {
+    padding: 0 2px;
+    background-color: white;
+    border: 1px solid rgb(130,32,0);
+    border-radius: 4px;
+    color: 1px solid rgb(130,32,0);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.button:hover {
+    cursor: pointer;
+    background-color: rgb(240, 240, 240);
+}
+
+.button:focus {
+    outline: 1px solid black;
+}
