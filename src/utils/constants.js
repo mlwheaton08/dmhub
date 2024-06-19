@@ -1,3 +1,131 @@
+export const convertRollStringToObj = (string) => {
+    // example string 1: 12d20+14
+    // example string 2: 12d20
+    // example string 3: 12
+
+    // if just a static number (no dice roll), just return null
+    const dIndex = string.indexOf("d")
+    if (dIndex === -1) return null
+    
+    // otherwise continue on to parse and make object
+    const outputObj = {
+        dice_count: null,
+        die: null,
+        modifier: null
+    }
+
+    // iterate through string
+    let currentString = ""
+    let foundModifier
+    for (let i = 0; i < string.length; i++) {
+        switch (string[i]) {
+            case "d":
+                outputObj.dice_count = parseInt(currentString)
+                currentString = ""
+                break
+            case "+":
+                foundModifier = true
+                outputObj.die = parseInt(currentString)
+                currentString = ""
+                break
+            default:
+                currentString += string[i]
+        }
+    }
+
+    // after loop, determine which property the remaining currentString belongs to
+    if (foundModifier) outputObj.modifier = parseInt(currentString)
+    else outputObj.die = parseInt(currentString)
+
+    return outputObj
+}
+
+export const convertActionDescriptionToObj = (action) => {
+    // const exampleAction = {
+    //     attack_bonus: 17,
+    //     damage: [
+    //         {damage_dice: "2d10+10"},
+    //         {damage_dice: "4d6"}
+    //     ],
+    //     desc: "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage."
+    // }
+    const a = action
+
+    // format damage dice to match the description (include the space)
+    const actionHasAttackBonus = Object.hasOwn(a, "attack_bonus") && !isNaN(a.attack_bonus)
+    const actionHasDamage = Object.hasOwn(a, "damage") && a.damage.length > 0
+    if (actionHasDamage) for (const d of a.damage) d.damage_dice_formatted = d.damage_dice.split("+").join(" + ")
+
+    const descriptionObj = {
+        preBonus: "",
+        preDamage: [""],
+        remainder: ""
+    }
+
+    // attack bonus
+    if (actionHasAttackBonus) descriptionObj.preBonus = a.desc.slice(0, a.desc.indexOf(a.attack_bonus) - 1)
+
+    // damage
+    if (actionHasDamage) {
+        a.damage.map((d, index) => {
+            if (index > 0) descriptionObj.preDamage[index] = a.desc.slice(a.desc.indexOf(a.damage[index - 1].damage_dice_formatted) + a.damage[index - 1].damage_dice_formatted.length + 1, a.desc.indexOf(d.damage_dice_formatted) - 1)
+            else {
+                if (actionHasAttackBonus) descriptionObj.preDamage[index] = a.desc.slice(a.desc.indexOf(a.attack_bonus) + a.attack_bonus.toString().length, a.desc.indexOf(d.damage_dice_formatted) - 1)
+                else descriptionObj.preDamage[index] = a.desc.slice(0, a.desc.indexOf(d.damage_dice_formatted) - 1)
+            }
+        })
+    }
+
+    // remainder
+    if (!actionHasAttackBonus && !actionHasDamage) descriptionObj.remainder = a.desc
+    else if (actionHasAttackBonus && !actionHasDamage) descriptionObj.remainder = a.desc.slice(a.desc.indexOf(a.attack_bonus) + a.attack_bonus.toString().length)
+    else if (actionHasDamage) descriptionObj.remainder = a.desc.slice(a.desc.indexOf(a.damage[a.damage.length - 1].damage_dice_formatted) + a.damage[a.damage.length - 1].damage_dice_formatted.toString().length + 1)
+    else if (actionHasDamage) {
+        // be sure to start from that LAST damage index, since it's an array
+    } else {
+        descriptionObj.remainder = a.desc
+    }
+
+    return descriptionObj
+}
+
+// console.log(convertActionDescriptionToObj(
+//     {
+//         attack_bonus: 17,
+//         damage: [
+//             {damage_dice: "2d10+10"},
+//             {damage_dice: "4d6"}
+//         ],
+//         desc: "Melee Weapon Attack: +17 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage."
+//     }
+// ))
+
+export const formatMonsterObj = (m) => {
+    // creating a copy. idk if i need this or not
+    const monsterObj = m
+    // hit points object
+    monsterObj.hit_points_roll_obj = convertRollStringToObj(monsterObj.hit_points_roll)
+    // actions
+    monsterObj.actions.map((a) => {
+        a.desc_obj = convertActionDescriptionToObj(a)
+        if (a.hasOwnProperty('damage') && a.damage.length > 0) a.damage.map((d) => {
+            d.damage_dice_roll_obj = convertRollStringToObj(d.damage_dice)
+        })
+    })
+    // legendary actions object
+    monsterObj.legendary_actions.map((la) => {
+        la.desc_obj = convertActionDescriptionToObj(la)
+        if (la.hasOwnProperty('damage')) la.damage.map((d) => {
+            d.damage_dice_roll_obj = convertRollStringToObj(d.damage_dice)
+        })
+    })
+    // challenge rating string (fraction)
+    if (monsterObj.challenge_rating < 1 && monsterObj.challenge_rating > 0) monsterObj.challenge_rating_fraction = `1/${1 / monsterObj.challenge_rating}`
+    else monsterObj.challenge_rating_fraction = monsterObj.challenge_rating.toString()
+
+    return monsterObj
+}
+
 export const emptySlot = {
     "initiative": {value: ""},
     "name": {value: ""},
@@ -31,152 +159,3 @@ export const defaultColumns = {
     "conditions": {displayOrder: 5, displayName: "Conditions", hidden: false, width: "18%"},
     "notes": {displayOrder: 6, displayName: "Notes", hidden: false, width: "34%"}
 }
-
-export const exampleMonsterObj = {
-    index: "skeleton",
-    name: "Skeleton",
-    size: "bob",
-    type: "undead",
-    alignment: "lawful evil",
-    // below is an array. do i need to iterate through it? are there monsters with multiple of these?
-    armor_class: [
-        {
-            type: "armor",
-            value: 13,
-            desc: "armor scraps"
-        }
-    ],
-    hit_points: 13,
-    hit_dice: "2d8",
-    hit_points_roll: "2d8+4",
-    hit_points_roll_obj: {
-        die_count: 2,
-        die: 8,
-        modifier: 4
-    },
-    // remember there are other speed types (swim, fly, etc.)
-    speed: {
-        walk: "30 ft."
-    },
-    strength: 10,
-    // "To determine an ability modifier, subtract 10 from the ability score and then divide the total by 2 (round down)"
-    dexterity: 14,
-    constitution: 15,
-    intelligence: 6,
-    wisdom: 8,
-    charisma: 5,
-    proficiencies: [],
-    damage_vulnerabilities: [
-        "bludgeoning"
-    ],
-    damage_resistances: [],
-    damage_immunities: [
-        "poison"
-    ],
-    condition_immunities: [
-        {
-            index: "poisoned",
-            name: "Poisoned",
-            url: "/api/conditions/poisoned"
-        },
-        {
-            index: "exhaustion",
-            name: "Exhaustion",
-            url: "/api/conditions/exhaustion"
-        }
-    ],
-    senses: {
-        darkvision: "60 ft.",
-        passive_perception: 9
-    },
-    languages: "understands all languages it spoke in life but can't speak",
-    challenge_rating: 0.25,
-    proficiency_bonus: 2,
-    xp: 50,
-    actions: [
-        {
-            name: "Shortsword",
-            desc: "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6 + 2) piercing damage.",
-            attack_bonus: 4,
-            damage: [
-                {
-                    damage_type: {
-                        index: "piercing",
-                        name: "Piercing",
-                        url: "/api/damage-types/piercing"
-                    },
-                    damage_dice: "1d6+2",
-                    damage_dice_roll_obj: {
-                        die_count: 1,
-                        die: 6,
-                        modifier: 2
-                    }
-                }
-            ],
-            actions: []
-        },
-        {
-            name: "Shortbow",
-            desc: "Ranged Weapon Attack: +4 to hit, range 80/320 ft., one target. Hit: 5 (1d6 + 2) piercing damage.",
-            attack_bonus: 4,
-            damage: [
-                {
-                    damage_type: {
-                        index: "piercing",
-                        name: "Piercing",
-                        url: "/api/damage-types/piercing"
-                    },
-                    damage_dice: "1d6+2",
-                    damage_dice_roll_obj: {
-                        dieCount: 1,
-                        die: 6,
-                        modifier: 2
-                    }
-                }
-            ],
-            actions: []
-        }
-    ],
-    url: "/api/monsters/skeleton",
-    legendary_actions: [],
-    special_abilities: []
-}
-
-//----------------------------------------------
-// note: take from the dndbeyond stat block. i think this basically covers everything, but it's not 100% accurate (there is no "reactions" section for example)
-// Ancient Red Dragon
-// Huge dragon, chaotic evil
-
-// Armor Class 22 (natural armor)
-// Hit Points 256 (19d12 + 114)
-// Speed 40 ft., fly 80 ft., swim 40 ft.
-
-// ----------------------------------------------
-// Str 27 (+8), Dex 10 (+0), Con 25 (+7),
-// Int 16 (+3), Wis 13 (+1), Cha 21 (+5)
-
-// Saving Throws Dex +6, Con +13, Wis +7, Cha +11
-// Skills Perception +13, Stealth +6
-// Damage Resistances fire, bludgeoning, piercing, and slashing from nonmagical attacks
-// Condition Immunities charmed, frightened, paralyzed, poisoned
-// Senses blindsight 60 ft., darkvision 120 ft., passive Perception 23
-// Languages Common, Draconic
-// Challenge 24 (62,000 XP)
-// ----------------------------------------------
-
-// Traits:
-// - Legendary Resistance (3/Day). If the dragon fails a saving throw, it can choose to succeed instead.
-
-// Actions:
-// - Multiattack. The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws.
-// - Bite. Melee Weapon Attack: +16 to hit, reach 15 ft., one target. Hit: 21 (2d10 + 10) piercing damage plus 14 (4d6) fire damage.
-// - Claw. Melee Weapon Attack: +16 to hit, reach 10 ft., one target. Hit: 17 (2d6 + 10) slashing damage.
-// - Tail Attack. When a creature within 10 feet of the dragon hits it with an attack, the dragon can use its reaction to make a tail attack against that creature.
-
-// Reactions:
-// - Tail Attack. When a creature within 10 feet of the dragon hits it with an attack, the dragon can use its reaction to make a tail attack against that creature.
-
-// Legendary Actions (3/Day):
-// - Detect. The dragon makes a Wisdom (Perception) check.
-// - Tail Attack. The dragon makes a tail attack.
-// - Wing Attack (Costs 2 Actions). The dragon beats its wings. Each creature within 15 feet of the dragon must succeed on a DC 25 Dexterity saving throw or take 17 (2d6 + 8) bludgeoning damage and be knocked prone. The dragon can then fly up to half its flying speed.

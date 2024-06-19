@@ -4,12 +4,14 @@ import { useState } from "react"
 import { StatBlock } from "../stat_block/StatBlock"
 import { SearchBar } from "../search/SearchBar"
 import { RollPopup } from "../roll_popup/RollPopup"
+import { StatBlockForm } from "../stat_block/StatBlockForm"
 
 export function CombatTracker2() {
 
     const navigate = useNavigate()
 
     const [monster, setMonster] = useState({})
+    const [editStatBlock, setEditStatBlock] = useState(true)
     const [roll, setRoll] = useState({
         showRoll: false,
         rollType: "",
@@ -100,6 +102,15 @@ export function CombatTracker2() {
                         rollDice={rollDice}
                     />
             }
+
+            {/* {
+                !editStatBlock
+                    ? ""
+                    : <StatBlockForm
+                        monster={monster}
+                        rollDice={rollDice}
+                    />
+            } */}
 
             <RollPopup
                 roll={roll}

@@ -1,25 +1,8 @@
 import styles from "./StatBlock.module.css"
 
-export function StatBlock({ monster, rollDice }) {
-
-    // actions parsing not quite complete. some damage arrays have more options that go deeper to determine damage
-        // hobgoblin is what threw this error
-    // i still need skills displaying (under proficiencies)
-    // check out Cat - actions hit button not working bc there's no dice count. i think it makes sense to not "roll a die" for static numbers right?
-    // urls that show content when clicked (in a sidebar?)
-        // when the api is hit (clicked the word with url link), may want to add that content to another variable (so that it doesn't have to hit api every single time it's clicked. basically loads it up once and keeps it)
-
-    const displayAbilityScore = (abilityScore) => {
-        const modifier = `${abilityScore > 10 ? "+" : ""}${Math.floor((abilityScore - 10) / 2)}`
-        return `${abilityScore} (${modifier})` // ex: "14 (+2)"
-    }
-
-    const fetchInfoTest = async (apiUrl) => {
-        const response = await fetch(`https://www.dnd5eapi.co${apiUrl}`)
-        const responseObj = await response.json()
-        // responseObj.desc is an array, so check what all may be in there. air elemental is a good test monster
-        console.log(responseObj.desc)
-    }
+export function StatBlockForm({ monster, rollDice }) {
+    // wonder if I can use same StatBlock.module.css so that this is styled the same way. Just replacing a lot of the content with inputs
+        // it's ok if it proves to be too difficult. just a thought
 
 
     return <div className={styles.main}>
